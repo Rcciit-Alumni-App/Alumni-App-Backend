@@ -14,8 +14,9 @@ export class MailerService {
 
     mailTransport() {
         const transport = nodemailer.createTransport({
+            service: "gmail",
             host: this.config.get<string>("MAIL_HOST"),
-            port: this.config.get<number>("465"),
+            port: this.config.get<number>("MAIL_PORT"),
             secure: false,
             auth: {
                 user: this.config.get<string>("MAIL_USER"),
@@ -29,7 +30,7 @@ export class MailerService {
     async sendMail(sendMailDto: SendMailDto) {
         const { email, subject, mail_file, data } = sendMailDto;
         console.log('Executing send mail');
-        const templatePath = path.join(__dirname, '../mails', mail_file);
+        const templatePath = path.join(__dirname, '../../mails', mail_file);
         console.log('Template path:', templatePath);
         if (!fs.existsSync(templatePath)) {
             throw new Error(`Template file not found: ${templatePath}`);
@@ -37,12 +38,9 @@ export class MailerService {
         const html: string = await ejs.renderFile(templatePath, data);
 
         const transport = this.mailTransport();
-
+        console.log("Transport created");
         const options: Mail.Options = {
-            from: {
-                name: this.config.get("APP_NAME"),
-                address: this.config.get("DEFAULT_MAIL_FROM")
-            },
+            from: this.config.get("DEFAULT_MAIL_FROM"),
             to: email,
             subject,
             html,
@@ -50,6 +48,8 @@ export class MailerService {
 
         try {
             const result = await transport.sendMail(options);
+            console.log("Mail Sent");
+            console.log(result);
             return result;
         } catch (error) {
             console.log('[EMAIL_ERROR]', error);

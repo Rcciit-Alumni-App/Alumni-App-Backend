@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto, SignupDto, VerifyDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
@@ -38,9 +38,7 @@ export class AuthService {
     });
 
     if (existsUser)
-      return {
-        message: "user already exists"
-      };
+      throw new UnauthorizedException("User already exists");
     // generate the end year and detect the user type
 
     const userType: UserType = verifyAlumniStudent(college_email);
@@ -71,16 +69,16 @@ export class AuthService {
 
     // Send email
 
-    // const mailData = {
-    //   otp: otp
-    // };
+    const mailData = {
+      otp: otp
+    };
 
-    // await this.mailer.sendMail({
-    //   email: userType === "ALUMNI" ? personal_email : college_email,
-    //   subject: 'Account Activation',
-    //   mail_file: 'verification_mail.ejs',
-    //   data: mailData
-    // })
+    await this.mailer.sendMail({
+      email: userType === "ALUMNI" ? personal_email : college_email,
+      subject: 'Account Activation',
+      mail_file: 'verification_mail.ejs',
+      data: mailData
+    })
 
     return {
       verificationToken,
@@ -100,9 +98,7 @@ export class AuthService {
 
     // Decode the token and check with otp
     if (decoded.otp !== otp)
-      return {
-        message: "Wrong OTP"
-      };
+      throw new UnauthorizedException("Wrong OTP");
     // Save the user to database
 
     const user = await this.prisma.user.create({
@@ -138,12 +134,14 @@ export class AuthService {
         personal_mail: personal_email,
       }
     });
+
+    if(!user)
+      throw new UnauthorizedException("Wrong credentials");
+
     const verified = await argon.verify(user.password, password);
     console.log(verified);
     if (!verified)
-      return {
-        message: "Unauthorized"
-      };
+      throw new UnauthorizedException("Wrong credentials");
 
     // Sign access_token and return
     const access_token = await this.signAccessToken(user.id, user.personal_mail, user.user_type);
