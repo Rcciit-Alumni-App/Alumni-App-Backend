@@ -1,13 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Token } from 'utils/decorators/token.decorator';
 
-@Controller('profile')
+@Controller('user/profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get()
-  async getProfile() {
-    // Add your profile retrieval logic here
-    return this.profileService.getProfile();
+  @UseGuards(JwtAuthGuard)
+  @Get('/details')
+  async getProfile(@Token() token: string) {
+    return this.profileService.getProfile(token);
   }
 }

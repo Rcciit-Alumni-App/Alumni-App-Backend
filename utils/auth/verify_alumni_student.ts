@@ -4,11 +4,8 @@ export const verifyAlumniStudent = (email: string): { user_type: UserType, strea
     const stripped_email = email.split('@')[0];
     const isBOrL = email.split('@')[1].toLowerCase()[1];
     const departmentCode = stripped_email.match(/^[a-zA-Z]+/)[0].toUpperCase();
-    console.log(departmentCode); // Output: CSE
     let year = parseInt(stripped_email.match(/(\d{4})/)[0], 10);
-    console.log('Email Year:', year);
     const currentYear = new Date().getFullYear();
-    console.log('Current Year:', currentYear);
 
     if (isBOrL === 'b' || isBOrL === 'l') {
         year -= 1;

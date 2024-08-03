@@ -5,6 +5,5 @@ export const generateOTP = (length: number): string => {
     for (let index = 0; index < length; index++) {
         otp += randomInt(0, 10).toString();
     }
-    console.log('OTP:', otp);
     return otp;
 }
