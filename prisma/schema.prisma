@@ -28,7 +28,7 @@ enum UserStatus {
 model User {
   id              String          @id @default(auto()) @map("_id") @db.ObjectId
   full_name       String?
-  phone           BigInt?
+  phone           String
   personal_mail   String          @unique
   college_mail    String          @unique
   password        String
@@ -38,15 +38,28 @@ model User {
   user_type       UserType
   stream          String?
   status          UserStatus
-  higher_studies  HigherStudies[]
+  higher_studies  HigherStudies[] @relation("UserHigherStudies")
+  internships     Internships[] @relation("UserInternships")
 }
 
 model HigherStudies {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  Institute  String
-  Course     String
-  Start_date DateTime
-  End_date   DateTime
-  userId     String   @unique @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institute  String
+  course     String
+  start_date DateTime
+  end_date   DateTime
+  user       User?    @relation("UserHigherStudies", fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     String?  @db.ObjectId
 }
+
+model Internships {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  company    String
+  role       String
+  start_date DateTime
+  end_date   DateTime
+  skills     String[]
+  user       User?    @relation("UserInternships", fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     String?  @db.ObjectId
+}
+

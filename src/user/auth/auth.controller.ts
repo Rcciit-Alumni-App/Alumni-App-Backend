@@ -20,7 +20,7 @@ export class AuthController {
         return await this.authService.verify(verifyDto);
     }
 
-    @Post('login')
+    @Post('/login')
     async login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
     }
