@@ -126,10 +126,10 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { personal_email, password } = loginDto;
+    const { personal_mail, password } = loginDto;
     const user = await this.prisma.user.findFirst({
       where: {
-        personal_mail: personal_email,
+        personal_mail: personal_mail,
       },
     });
 
