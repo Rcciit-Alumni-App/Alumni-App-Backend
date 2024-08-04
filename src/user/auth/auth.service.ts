@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, SignupDto, VerifyDto } from './dto';
+import { LoginDto, ResetPasswordDto, SignupDto, VerifyDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserStatus, UserType } from '@prisma/client';
@@ -15,33 +15,30 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
-    private readonly mailer: MailerService
-  ) { }
+    private readonly mailer: MailerService,
+  ) {}
   async signup(signupDto: SignupDto) {
     console.log(signupDto);
 
     // Get emails, password
-    const {
-      college_email,
-      college_roll,
-      password,
-      personal_email,
-    } = signupDto;
+    const { college_email, college_roll, password, personal_email } = signupDto;
 
     // Check with database if any user exists or not
     const existsUser = await this.prisma.user.findFirst({
       where: {
         college_mail: college_email,
         college_roll,
-        personal_mail: personal_email
-      }
+        personal_mail: personal_email,
+      },
     });
 
-    if (existsUser)
-      throw new UnauthorizedException("User already exists");
+    if (existsUser) throw new UnauthorizedException('User already exists');
     // generate the end year and detect the user type
 
-    const userType: UserType = verifyAlumniStudent(college_email);
+    const userType: {
+      user_type: UserType;
+      stream: string;
+    } = verifyAlumniStudent(college_email);
 
     // Generate otp
 
@@ -58,116 +55,187 @@ export class AuthService {
       college_roll,
       password: hashedPassword,
       otp,
-      userType
+      user_type: userType.user_type,
+      stream: userType.stream,
     };
 
-    console.log(payload);
     const verificationToken = this.jwt.sign(payload, {
-      expiresIn: "5m",
-      secret: this.config.get("JWT_VERIFICATION_SECRET")
+      expiresIn: '5m',
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
     });
 
     // Send email
 
     const mailData = {
-      otp: otp
+      otp: otp,
     };
 
     await this.mailer.sendMail({
-      email: userType === "ALUMNI" ? personal_email : college_email,
+      email: userType.user_type === 'ALUMNI' ? personal_email : college_email,
       subject: 'Account Activation',
       mail_file: 'verification_mail.ejs',
-      data: mailData
-    })
+      data: mailData,
+    });
 
     return {
       verificationToken,
-      otp
     };
   }
 
   async verify(verifyDto: VerifyDto) {
-
     const { otp, verification_token } = verifyDto;
     // Get token and otp
     const decoded = this.jwt.verify(verification_token, {
-      secret: this.config.get("JWT_VERIFICATION_SECRET")
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
     });
 
     console.log(decoded);
 
     // Decode the token and check with otp
-    if (decoded.otp !== otp)
-      throw new UnauthorizedException("Wrong OTP");
+    if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
     // Save the user to database
 
     const user = await this.prisma.user.create({
       data: {
+        full_name: '',
+        phone: '',
         college_mail: decoded.college_email,
         personal_mail: decoded.personal_email,
         college_roll: decoded.college_roll,
         password: decoded.password,
+        stream: decoded.stream,
         status: UserStatus.ACCOUNT_DETAILS,
-        user_type: decoded.userType,
-      }
+        user_type: decoded.user_type,
+        profile_pic_url: '',
+        university_roll: '',
+      },
     });
 
     // Sign access_token and return
 
-    const access_token = await this.signAccessToken(user.id, user.personal_mail, user.user_type);
-    console.log(access_token);
+    const access_token = await this.signAccessToken(
+      user.id,
+      user.personal_mail,
+      user.user_type,
+    );
     // TODO:Save to redis
 
     return {
-      access_token
+      access_token,
     };
   }
 
   async login(loginDto: LoginDto) {
-    console.log(loginDto);
-    // Get email and password
     const { personal_email, password } = loginDto;
-
-    // Check with database
     const user = await this.prisma.user.findFirst({
       where: {
         personal_mail: personal_email,
-      }
+      },
     });
 
-    if(!user)
-      throw new UnauthorizedException("Wrong credentials");
+    if (!user) throw new UnauthorizedException('User does not exist !');
 
     const verified = await argon.verify(user.password, password);
-    console.log(verified);
-    if (!verified)
-      throw new UnauthorizedException("Wrong credentials");
-
-    // Sign access_token and return
-    const access_token = await this.signAccessToken(user.id, user.personal_mail, user.user_type);
+    if (!verified) throw new UnauthorizedException('Invalid Password !');
+    const access_token = await this.signAccessToken(
+      user.id,
+      user.personal_mail,
+      user.user_type,
+    );
     console.log(access_token);
     // TODO:Save to redis
 
     return {
-      access_token
+      access_token,
     };
   }
-
 
   logout() {
     // TODO: To be implemented
   }
 
-  signAccessToken(userId: string, email: string, userType: UserType): Promise<string> {
+  async forgotPassword(email: string) {
+    const existsUser = await this.prisma.user.findUnique({
+      where: {
+        personal_mail: email,
+      },
+    });
+
+    if (!existsUser) throw new UnauthorizedException('User does not exist');
+    const otp = generateOTP(6);
+    console.log(existsUser);
+    // sign verification token
+    const payload = {
+      user_id: existsUser.id,
+      personal_mail: email,
+      otp,
+    };
+
+    const verificationToken = this.jwt.sign(payload, {
+      expiresIn: '5m',
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
+    });
+
+    // Send email
+
+    const mailData = {
+      otp: otp,
+    };
+
+    await this.mailer.sendMail({
+      email: email,
+      subject: 'Forgot Password',
+      mail_file: 'verification_mail.ejs',
+      data: mailData,
+    });
+
+    return {
+      verificationToken,
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { otp, password, verification_token } = resetPasswordDto;
+    const decoded = this.jwt.verify(verification_token, {
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
+    });
+
+    if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
+
+    const user = await this.prisma.user.update({
+      where: {
+        id: decoded.user_id,
+        personal_mail: decoded.email,
+      },
+      data: {
+        password: await argon.hash(password),
+      },
+    });
+
+    const access_token = await this.signAccessToken(
+      user.id,
+      user.personal_mail,
+      user.user_type,
+    );
+    return {
+      access_token,
+    };
+  }
+
+  signAccessToken(
+    userId: string,
+    email: string,
+    userType: UserType,
+  ): Promise<string> {
     const payload = {
       sub: userId,
       email,
-      userType
+      userType,
     };
 
     return this.jwt.signAsync(payload, {
-      expiresIn: "7d",
-      secret: this.config.get("JWT_AUTHENTICATION_SECRET")
+      expiresIn: '7d',
+      secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
     });
   }
 }
