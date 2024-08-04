@@ -109,12 +109,6 @@ export class AuthService {
         user_type: decoded.user_type,
         profile_pic_url: '',
         university_roll: '',
-        higher_studies: {
-          connectOrCreate: []  
-        },
-        internships: {
-          connectOrCreate: []  
-        },
       },
     });
 

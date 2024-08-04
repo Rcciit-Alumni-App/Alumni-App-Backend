@@ -38,28 +38,24 @@ model User {
   user_type       UserType
   stream          String?
   status          UserStatus
-  higher_studies  HigherStudies[] @relation("UserHigherStudies")
-  internships     Internships[] @relation("UserInternships")
+  higher_studies  HigherStudies[]
+  internships     Internships[]
 }
 
-model HigherStudies {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+type HigherStudies {
+  id         Int           
   institute  String
   course     String
   start_date DateTime
   end_date   DateTime
-  user       User?    @relation("UserHigherStudies", fields: [user_id], references: [id], onDelete: Cascade)
-  user_id     String?  @db.ObjectId
 }
 
-model Internships {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+type Internships {
+  id         Int     
   company    String
   role       String
   start_date DateTime
   end_date   DateTime
   skills     String[]
-  user       User?    @relation("UserInternships", fields: [user_id], references: [id], onDelete: Cascade)
-  user_id     String?  @db.ObjectId
 }
 
