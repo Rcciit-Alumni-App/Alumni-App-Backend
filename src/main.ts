@@ -17,6 +17,7 @@ async function bootstrap() {
     .setTitle('Alumni App API')
     .setDescription('Documentation for All the APIs for Alumni App RCCIIT')
     .setVersion('1.0')
+    .addServer('https://alumni-app-backend.onrender.com/', 'Production environment')
     .addServer('http://localhost:8000/', 'Local environment')
     .addTag('RCCIIT Alumni Association App')
     .addBearerAuth({
@@ -29,6 +30,7 @@ async function bootstrap() {
 const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
   app.use('/api-docs', BasicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(document));
-  await app.listen(8000);
+  const port = process.env.PORT || 8000; 
+  await app.listen(port);
 }
 bootstrap();
