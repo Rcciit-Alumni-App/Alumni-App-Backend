@@ -13,7 +13,7 @@ export class ProfileService {
     private readonly config: ConfigService,
   ) {}
 
-  async getProfile(token: string):Promise<UserDto> {
+  async getProfile(token: string): Promise<UserDto> {
     const userId = decodeToken(token, this.jwt, this.config);
     const userProfile = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -25,20 +25,32 @@ export class ProfileService {
     return userProfile;
   }
 
-  async updateProfile(token: string, data: any): Promise<UserDto> {
+  async updateProfile(token: string, data: any): Promise<{ message: string; updatedProfile: UserDto }> {
     const userId = decodeToken(token, this.jwt, this.config);
+    let message = '';
+    if (data?.personal_mail) {
 
-    // Handle the Prisma update
-    const updatedData = {...data};
+          delete data.personal_mail;
+          message += 'Personal email cannot be updated. ';
+    }
+    if (data?.college_mail) {
+      delete data.college_mail;
+      message += 'College email cannot be updated. ';
+    }
+  
+    const updatedData = { ...data };
+  
     const updatedProfile = await this.prisma.user.update({
       where: { id: userId },
-      data:updatedData,
+      data: updatedData,
     });
+    console.log(message);
   
-    return updatedProfile;
+    return {
+      message: message + 'Profile updated successfully.',
+      updatedProfile,
+    };
   }
-  
-  
   
   
 }

@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsEmail,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -46,11 +47,9 @@ export class UserDto {
   @IsString()
   id: string;
 
-  @IsOptional()
   @IsString()
   full_name?: string;
 
-  @IsOptional()
   @IsString()
   phone?: string;
 
@@ -70,18 +69,15 @@ export class UserDto {
   @IsNotEmpty()
   college_roll: string;
 
-  @IsOptional()
   @IsString()
   university_roll?: string;
 
-  @IsOptional()
   @IsString()
   profile_pic_url?: string;
 
   @IsEnum(UserType)
   user_type: UserType;
 
-  @IsOptional()
   @IsString()
   stream?: string;
 
@@ -99,8 +95,8 @@ export class UserDto {
 
 export class HigherStudiesUpdateDto {
   @IsOptional()
-  @IsString()
-  id?: string; // Include the id as optional
+  @IsInt()
+  id?: number; // Include the id as optional
 
   @IsString()
   institute: string;
@@ -117,8 +113,8 @@ export class HigherStudiesUpdateDto {
 
 export class InternshipsUpdateDto {
   @IsOptional()
-  @IsString()
-  id?: string; // Include the id as optional
+  @IsInt()
+  id?: number; 
 
   @IsString()
   company: string;
@@ -148,12 +144,10 @@ export class UpdateUserDto {
 
   @IsEmail()
   @IsOptional()
-  @IsNotEmpty()
   personal_mail?: string;
 
   @IsEmail()
   @IsOptional()
-  @IsNotEmpty()
   college_mail?: string;
 
   @IsOptional()

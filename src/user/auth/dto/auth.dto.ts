@@ -38,3 +38,20 @@ export class LoginDto {
     @MinLength(6)
     password: string;
 }
+
+export class ResetPasswordDto {
+
+    @IsString()
+    @IsNotEmpty()
+    otp: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(6)
+    password: string;
+
+    @IsString()
+    @IsNotEmpty()
+    verification_token: string;
+
+}

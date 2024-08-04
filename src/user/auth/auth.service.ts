@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, SignupDto, VerifyDto } from './dto';
+import { LoginDto, ResetPasswordDto, SignupDto, VerifyDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserStatus, UserType } from '@prisma/client';
@@ -59,7 +59,6 @@ export class AuthService {
       stream: userType.stream,
     };
 
-    console.log(payload);
     const verificationToken = this.jwt.sign(payload, {
       expiresIn: '5m',
       secret: this.config.get('JWT_VERIFICATION_SECRET'),
@@ -119,7 +118,6 @@ export class AuthService {
       user.personal_mail,
       user.user_type,
     );
-    console.log(access_token);
     // TODO:Save to redis
 
     return {
@@ -128,11 +126,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    console.log(loginDto);
-    // Get email and password
     const { personal_email, password } = loginDto;
-
-    // Check with database
     const user = await this.prisma.user.findFirst({
       where: {
         personal_mail: personal_email,
@@ -142,10 +136,7 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('User does not exist !');
 
     const verified = await argon.verify(user.password, password);
-    console.log(verified);
     if (!verified) throw new UnauthorizedException('Invalid Password !');
-
-    // Sign access_token and return
     const access_token = await this.signAccessToken(
       user.id,
       user.personal_mail,
@@ -161,6 +152,74 @@ export class AuthService {
 
   logout() {
     // TODO: To be implemented
+  }
+
+  async forgotPassword(email: string) {
+    const existsUser = await this.prisma.user.findUnique({
+      where: {
+        personal_mail: email,
+      },
+    });
+
+    if (!existsUser) throw new UnauthorizedException('User does not exist');
+    const otp = generateOTP(6);
+    console.log(existsUser);
+    // sign verification token
+    const payload = {
+      user_id: existsUser.id,
+      personal_mail: email,
+      otp,
+    };
+
+    const verificationToken = this.jwt.sign(payload, {
+      expiresIn: '5m',
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
+    });
+
+    // Send email
+
+    const mailData = {
+      otp: otp,
+    };
+
+    await this.mailer.sendMail({
+      email: email,
+      subject: 'Forgot Password',
+      mail_file: 'verification_mail.ejs',
+      data: mailData,
+    });
+
+    return {
+      verificationToken,
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { otp, password, verification_token } = resetPasswordDto;
+    const decoded = this.jwt.verify(verification_token, {
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
+    });
+
+    if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
+
+    const user = await this.prisma.user.update({
+      where: {
+        id: decoded.user_id,
+        personal_mail: decoded.email,
+      },
+      data: {
+        password: await argon.hash(password),
+      },
+    });
+
+    const access_token = await this.signAccessToken(
+      user.id,
+      user.personal_mail,
+      user.user_type,
+    );
+    return {
+      access_token,
+    };
   }
 
   signAccessToken(
