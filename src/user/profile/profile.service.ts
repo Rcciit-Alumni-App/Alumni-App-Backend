@@ -17,6 +17,21 @@ export class ProfileService {
     const userId = decodeToken(token, this.jwt, this.config);
     const userProfile = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        personal_mail: true,
+        college_mail: true,
+        college_roll: true,
+        university_roll: true,
+        profile_pic_url: true,
+        user_type: true,
+        stream: true,
+        status: true,
+        higher_studies: true,
+        internships: true,
+      },
     });
 
     if (!userProfile) {
