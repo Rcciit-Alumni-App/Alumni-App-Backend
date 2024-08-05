@@ -29,16 +29,13 @@ export class MailerService {
 
     async sendMail(sendMailDto: SendMailDto) {
         const { email, subject, mail_file, data } = sendMailDto;
-        console.log('Executing send mail');
         const templatePath = path.join(__dirname, '../../mails', mail_file);
-        console.log('Template path:', templatePath);
         if (!fs.existsSync(templatePath)) {
             throw new Error(`Template file not found: ${templatePath}`);
         }
         const html: string = await ejs.renderFile(templatePath, data);
 
         const transport = this.mailTransport();
-        console.log("Transport created");
         const options: Mail.Options = {
             from: this.config.get("DEFAULT_MAIL_FROM"),
             to: email,
@@ -48,8 +45,6 @@ export class MailerService {
 
         try {
             const result = await transport.sendMail(options);
-            console.log("Mail Sent");
-            console.log(result);
             return result;
         } catch (error) {
             console.log('[EMAIL_ERROR]', error);

@@ -6,12 +6,14 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MailerModule,
+    RedisModule,
   ],
   providers: [AuthService, JwtStrategy, JwtAuthGuard],
   controllers: [AuthController],
