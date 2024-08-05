@@ -26,11 +26,11 @@ enum UserStatus {
 }
 
 model User {
-  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
   full_name       String?
   phone           String
-  personal_mail   String          @unique
-  college_mail    String          @unique
+  personal_mail   String            @unique
+  college_mail    String            @unique
   password        String
   college_roll    String
   university_roll String?
@@ -40,10 +40,11 @@ model User {
   status          UserStatus
   higher_studies  HigherStudies[]
   internships     Internships[]
+  workExperiences WorkExperiences[]
 }
 
 type HigherStudies {
-  id         Int           
+  id         Int
   institute  String
   course     String
   start_date DateTime
@@ -51,7 +52,7 @@ type HigherStudies {
 }
 
 type Internships {
-  id         Int     
+  id         Int
   company    String
   role       String
   start_date DateTime
@@ -59,3 +60,20 @@ type Internships {
   skills     String[]
 }
 
+enum WorkStatus {
+  ONGOING
+  EX_EMPLOYEE
+}
+
+model WorkExperiences {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  user_id     String     @db.ObjectId
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  start_date  DateTime
+  end_date    DateTime?
+  status      WorkStatus
+  skills      String[]
+  description String
+}
