@@ -109,6 +109,7 @@ export class AuthService {
           college_mail: decoded.college_email,
           personal_mail: decoded.personal_email,
           college_roll: decoded.college_roll,
+          domain: '',
           password: decoded.password,
           stream: decoded.stream,
           status: UserStatus.ACCOUNT_DETAILS,

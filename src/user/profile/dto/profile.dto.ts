@@ -11,6 +11,25 @@ import {
   IsString,
 } from 'class-validator';
 
+
+export class SocialsDto {
+  @ApiProperty({
+    description: 'Name of the social media platform',
+    type: String,
+    example: 'LinkedIn',
+  })
+  @IsString()
+  platform: string;
+
+  @ApiProperty({
+    description: 'URL of the user’s profile on the social media platform',
+    type: String,
+    example: 'https://linkedin.com/in/johndoe',
+  })
+  @IsString()
+  url: string;
+}
+
 export class HigherStudiesDto {
   @ApiProperty({
     description: 'ID of the higher studies entry',
@@ -133,6 +152,14 @@ export class UserDto {
   @IsString()
   phone?: string;
 
+  @ApiPropertyOptional({
+    description: 'Domain',
+    type: String,
+    example: 'Web Development',
+  })
+  @IsString()
+  domain?: string;
+
   @ApiProperty({
     description: 'Personal email of the user',
     type: String,
@@ -216,6 +243,14 @@ export class UserDto {
   @IsOptional()
   @IsArray()
   internships?: InternshipsDto[];
+
+  @ApiPropertyOptional({
+    description: 'List of user’s social media profiles',
+    type: [SocialsDto], // Reference to SocialsDto class
+  })
+  @IsOptional()
+  @IsArray()
+  socials?: SocialsDto[];
 }
 
 export class HigherStudiesUpdateDto {
@@ -345,6 +380,14 @@ export class UpdateUserDto {
   personal_mail?: string;
 
   @ApiPropertyOptional({
+    description: 'Domain',
+    type: String,
+    example: 'Web Development',
+  })
+  @IsString()
+  domain?: string;
+
+  @ApiPropertyOptional({
     description: 'User’s college email address',
     type: String,
     example: 'john.doe@college.edu',
@@ -390,4 +433,6 @@ export class UpdateUserDto {
   @IsOptional()
   @IsArray()
   internships?: InternshipsUpdateDto[];
+
+
 }
