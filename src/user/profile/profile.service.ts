@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { decodeToken } from 'utils/auth/decodeToken';
-import { UserDto } from './dto/profile.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { InternalServerError } from 'utils/errors/server-error';
+import { UserDto } from './dto';
 
 @Injectable()
 export class ProfileService {
@@ -24,21 +24,6 @@ export class ProfileService {
         return user;
       const userProfile = await this.prisma.user.findUnique({
         where: { id: userId },
-        // select: {
-        //   id: true,
-        //   full_name: true,
-        //   phone: true,
-        //   personal_mail: true,
-        //   college_mail: true,
-        //   college_roll: true,
-        //   university_roll: true,
-        //   profile_pic_url: true,
-        //   user_type: true,
-        //   stream: true,
-        //   status: true,
-        //   higher_studies: true,
-        //   internships: true,
-        // },
       });
 
       delete userProfile.password;
@@ -79,6 +64,8 @@ export class ProfileService {
         where: { id: userId },
         data: updatedData,
       });
+
+      delete updatedProfile.password;
 
       return {
         message: message + 'Profile updated successfully.',
