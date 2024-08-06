@@ -34,6 +34,7 @@ model User {
   password        String
   college_roll    String
   university_roll String?
+  domain          String
   profile_pic_url String?
   user_type       UserType
   stream          String?

@@ -133,6 +133,14 @@ export class UserDto {
   @IsString()
   phone?: string;
 
+  @ApiPropertyOptional({
+    description: 'Domain',
+    type: String,
+    example: 'Web Development',
+  })
+  @IsString()
+  domain?: string;
+
   @ApiProperty({
     description: 'Personal email of the user',
     type: String,
@@ -343,6 +351,14 @@ export class UpdateUserDto {
   @IsEmail()
   @IsOptional()
   personal_mail?: string;
+
+  @ApiPropertyOptional({
+    description: 'Domain',
+    type: String,
+    example: 'Web Development',
+  })
+  @IsString()
+  domain?: string;
 
   @ApiPropertyOptional({
     description: 'User’s college email address',

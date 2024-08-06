@@ -57,13 +57,20 @@ export class ProfileService {
       const userId = decodeToken(token, this.jwt, this.config);
       let message = '';
       if (data?.personal_mail) {
-
         delete data.personal_mail;
         message += 'Personal email cannot be updated. ';
       }
       if (data?.college_mail) {
         delete data.college_mail;
         message += 'College email cannot be updated. ';
+      }
+      if(data?.stream){
+        delete data.stream;
+        message += 'Stream cannot be updated. ';
+      }
+      if(data?.college_roll){
+        delete data.college_roll;
+        message += 'College roll cannot be updated. ';
       }
 
       const updatedData = { ...data };
