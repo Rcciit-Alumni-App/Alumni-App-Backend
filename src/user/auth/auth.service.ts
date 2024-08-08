@@ -23,7 +23,7 @@ export class AuthService {
   ) { }
   async signup(signupDto: SignupDto) {
 
-    try {
+    // try {
       // Get emails, password
       const { college_email, college_roll, password, personal_email } = signupDto;
 
@@ -49,9 +49,8 @@ export class AuthService {
       const otp = generateOTP(6);
 
       // Hash password
-
       const hashedPassword = await argon.hash(password);
-
+      
       // sign verification token
       const payload = {
         college_email,
@@ -62,31 +61,32 @@ export class AuthService {
         user_type: userType.user_type,
         stream: userType.stream,
       };
-
+      
       const verificationToken = this.jwt.sign(payload, {
         expiresIn: '5m',
         secret: this.config.get('JWT_VERIFICATION_SECRET'),
       });
-
+      
       // Send email
-
+      
       const mailData = {
         otp: otp,
       };
-
+      
       await this.mailer.sendMail({
         email: userType.user_type === 'ALUMNI' ? personal_email : college_email,
         subject: 'Account Activation',
         mail_file: 'verification_mail.ejs',
         data: mailData,
       });
-
+console.log(verificationToken);
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
+    // } catch (error) {
+    //   console.log('[SIGNUP_ERROR]');
+    // }
+    // throw new InternalServerError();
   }
 
   async verify(verifyDto: VerifyDto) {
@@ -184,8 +184,8 @@ export class AuthService {
           personal_mail: personal_mail,
         },
       });
-
       if (!user) throw new UnauthorizedException('User does not exist !');
+
 
       const verified = await argon.verify(user.password, password);
       if (!verified) throw new UnauthorizedException('Invalid Password !');
@@ -204,6 +204,7 @@ export class AuthService {
         access_token,
       };
     } catch (error) {
+      console.log('[LOGIN_ERROR]');
       throw new InternalServerError();
     }
   }

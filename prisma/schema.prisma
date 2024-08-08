@@ -26,6 +26,19 @@ enum UserStatus {
   COMPLETED
 }
 
+model CollegeUser {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  roll_no       String
+  stream        String
+  passing_year  String
+  phone_number  String
+  personal_mail String
+  college_mail  String
+
+  @@index([college_mail, personal_mail])
+}
+
 model User {
   id              String            @id @default(auto()) @map("_id") @db.ObjectId
   full_name       String?
