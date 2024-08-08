@@ -90,7 +90,6 @@ console.log(verificationToken);
   }
 
   async verify(verifyDto: VerifyDto) {
-    try {
       const { otp, verification_token } = verifyDto;
       // Get token and otp
       const decoded = this.jwt.verify(verification_token, {
@@ -135,13 +134,9 @@ console.log(verificationToken);
       return {
         access_token,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async resendOTP(token: string) {
-    try {
       const decoded = this.jwt.verify(token, {
         secret: this.config.get('JWT_VERIFICATION_SECRET'),
       });
@@ -171,13 +166,9 @@ console.log(verificationToken);
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async login(loginDto: LoginDto) {
-    try {
       const { personal_mail, password } = loginDto;
       const user = await this.prisma.user.findFirst({
         where: {
@@ -215,7 +206,6 @@ console.log(verificationToken);
   }
 
   async forgotPassword(email: string) {
-    try {
       const existsUser = await this.prisma.user.findUnique({
         where: {
           personal_mail: email,
@@ -253,13 +243,9 @@ console.log(verificationToken);
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
-    try {
 
       const { password, new_password } = resetPasswordDto;
 
@@ -312,9 +298,6 @@ console.log(verificationToken);
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async updatePassword(updatePasswordDto: UpdatePasswordDto) {
