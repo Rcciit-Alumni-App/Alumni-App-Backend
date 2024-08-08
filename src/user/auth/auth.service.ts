@@ -22,8 +22,6 @@ export class AuthService {
     private readonly redis: RedisService,
   ) { }
   async signup(signupDto: SignupDto) {
-
-    try {
       // Get emails, password
       const { college_email, college_roll, password, personal_email } = signupDto;
 
@@ -84,13 +82,9 @@ export class AuthService {
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async verify(verifyDto: VerifyDto) {
-    try {
       const { otp, verification_token } = verifyDto;
       // Get token and otp
       const decoded = this.jwt.verify(verification_token, {
@@ -135,13 +129,9 @@ export class AuthService {
       return {
         access_token,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async resendOTP(token: string) {
-    try {
       const decoded = this.jwt.verify(token, {
         secret: this.config.get('JWT_VERIFICATION_SECRET'),
       });
@@ -171,13 +161,9 @@ export class AuthService {
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async login(loginDto: LoginDto) {
-    try {
       const { personal_mail, password } = loginDto;
       const user = await this.prisma.user.findFirst({
         where: {
@@ -203,9 +189,6 @@ export class AuthService {
       return {
         access_token,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   logout(token: string) {
@@ -214,7 +197,6 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
-    try {
       const existsUser = await this.prisma.user.findUnique({
         where: {
           personal_mail: email,
@@ -252,13 +234,9 @@ export class AuthService {
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
-    try {
 
       const { password, new_password } = resetPasswordDto;
 
@@ -311,9 +289,6 @@ export class AuthService {
       return {
         verificationToken,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async updatePassword(updatePasswordDto: UpdatePasswordDto) {

@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserDto } from './dto';
-import { InternalServerError } from '../../../utils/errors/server-error';
 import { decodeToken } from '../../../utils/auth/decodeToken';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { RedisService } from '../../../src/redis/redis.service';
@@ -17,7 +16,6 @@ export class ProfileService {
   ) { }
 
   async getProfile(token: string): Promise<UserDto> {
-    try {
       const userId = decodeToken(token, this.jwt, this.config);
       const user = await this.redis.getValue(userId);
       if (user)
@@ -32,13 +30,9 @@ export class ProfileService {
         throw new UnauthorizedException('User not found');
       }
       return userProfile;
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 
   async updateProfile(token: string, data: any): Promise<{ message: string; updatedProfile: UserDto }> {
-    try {
       const userId = decodeToken(token, this.jwt, this.config);
       let message = '';
       if (data?.personal_mail) {
@@ -71,8 +65,5 @@ export class ProfileService {
         message: message + 'Profile updated successfully.',
         updatedProfile,
       };
-    } catch (error) {
-      throw new InternalServerError();
-    }
   }
 }
