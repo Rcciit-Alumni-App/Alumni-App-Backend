@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { decodeToken } from 'utils/auth/decodeToken';
-import { RedisService } from 'src/redis/redis.service';
-import { InternalServerError } from 'utils/errors/server-error';
 import { UserDto } from './dto';
+import { InternalServerError } from '../../../utils/errors/server-error';
+import { decodeToken } from '../../../utils/auth/decodeToken';
+import { PrismaService } from '../../../src/prisma/prisma.service';
+import { RedisService } from '../../../src/redis/redis.service';
 
 @Injectable()
 export class ProfileService {

@@ -1,8 +1,8 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import {  ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import {  ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import * as swaggerUi from 'swagger-ui-express';
+import { AppModule } from './app.module';
 import { BasicAuthMiddleware } from 'middlewares/swagger-auth';
 
 async function bootstrap() {

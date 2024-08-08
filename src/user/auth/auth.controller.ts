@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto, ResetPasswordDto, SignupDto, VerifyDto } from './dto';
-import { verifyRollNo } from 'utils/auth/verify_roll_no';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
+import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { Token } from 'utils/decorators/token.decorator';
+import { verifyRollNo } from '../../../utils/auth/verify_roll_no';
+import { Token } from '../../../utils/decorators/token.decorator';
+import { Throttle } from '@nestjs/throttler';
 @ApiTags('Authentication Flow')
 @Controller('user/auth')
 export class AuthController {
@@ -93,8 +94,11 @@ export class AuthController {
     return await this.authService.verify(verifyDto);
   }
 
+  @Throttle({ deafult: { ttl: 60000, limit: 2 } })
   @Post("/resend-otp")
-  async resendOTP(){}
+  async resendOTP(@Body() token: string) {
+    return this.authService.resendOTP(token);
+  }
 
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({
@@ -204,8 +208,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post("/reset-password")
-  async resetPassword() {
-
+  async resetPassword(@Token() token: string, @Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(token, resetPasswordDto);
   }
 
   @ApiOperation({ summary: 'Reset a user password' })
@@ -244,8 +248,8 @@ export class AuthController {
     },
   })
   @Post('/update-password')
-  async updatePassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.updatePassword(resetPasswordDto);
+  async updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.authService.updatePassword(updatePasswordDto);
   }
 
 

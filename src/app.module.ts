@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from './mailer/mailer.module';
-import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from './redis/redis.module';
 
 @Module({

@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { ProfileService } from './profile.service';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { Token } from 'utils/decorators/token.decorator';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto, UserDto } from './dto';
+import { ProfileService } from './profile.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Token } from '../../../utils/decorators/token.decorator';
 
 @ApiTags('Profile Flow')
 @Controller('user/profile')

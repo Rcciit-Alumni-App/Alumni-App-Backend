@@ -1,7 +1,7 @@
 // src/common/decorators/token.decorator.ts
 
 import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { getToken } from 'utils/auth/getToken';
+import { getToken } from '../../utils/auth/getToken';
 
 export const Token = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
