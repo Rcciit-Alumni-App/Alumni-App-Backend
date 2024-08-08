@@ -1,16 +1,16 @@
+import * as argon from 'argon2';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, ResetPasswordDto, SignupDto, VerifyDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserStatus, UserType } from '@prisma/client';
-import { verifyAlumniStudent } from 'utils/auth/verify_alumni_student';
-import { generateOTP } from 'utils/auth/generate_otp';
-import { MailerService } from 'src/mailer/mailer.service';
-import * as argon from 'argon2';
-import { InternalServerError } from 'utils/errors/server-error';
-import { RedisService } from 'src/redis/redis.service';
-import { decodeToken } from 'utils/auth/decodeToken';
+import { User, UserStatus, UserType } from '@prisma/client';
+import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
+import { verifyAlumniStudent } from '../../../utils/auth/verify_alumni_student';
+import { InternalServerError } from '../../../utils/errors/server-error';
+import { generateOTP } from '../../../utils/auth/generate_otp';
+import { decodeToken } from '../../../utils/auth/decodeToken';
+import { MailerService } from '../../../src/mailer/mailer.service';
+import { PrismaService } from '../../../src/prisma/prisma.service';
+import { RedisService } from '../../../src/redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -127,6 +127,8 @@ export class AuthService {
         user.user_type,
         false
       );
+
+      delete user.password;
       // Save to redis
       this.redis.setCache(user.id, user);
 
@@ -138,8 +140,40 @@ export class AuthService {
     }
   }
 
-  async resendOTP() {
-    //TODO: to be implemented
+  async resendOTP(token: string) {
+    try {
+      const decoded = this.jwt.verify(token, {
+        secret: this.config.get('JWT_VERIFICATION_SECRET'),
+      });
+
+      const otp = generateOTP(6);
+
+      const payload = { ...decoded, otp: otp };
+
+      const verificationToken = this.jwt.sign(payload, {
+        expiresIn: '5m',
+        secret: this.config.get('JWT_VERIFICATION_SECRET'),
+      });
+
+      // Send email
+
+      const mailData = {
+        otp: otp,
+      };
+
+      await this.mailer.sendMail({
+        email: decoded.userType.user_type === 'ALUMNI' ? decoded.personal_email : decoded.college_email,
+        subject: 'Account Activation',
+        mail_file: 'verification_mail.ejs',
+        data: mailData,
+      });
+
+      return {
+        verificationToken,
+      };
+    } catch (error) {
+      throw new InternalServerError();
+    }
   }
 
   async login(loginDto: LoginDto) {
@@ -161,6 +195,8 @@ export class AuthService {
         user.user_type,
         false
       );
+
+      delete user.password;
       // Save to redis
       this.redis.setCache(user.id, user);
 
@@ -192,6 +228,7 @@ export class AuthService {
         user_id: existsUser.id,
         personal_mail: email,
         otp,
+        flag: 'F' // F -> forgot password, R -> reset password
       };
 
       const verificationToken = this.jwt.sign(payload, {
@@ -203,13 +240,12 @@ export class AuthService {
 
       const mailData = {
         otp: otp,
-        flag: 'F'
       };
 
       await this.mailer.sendMail({
         email: email,
         subject: 'Forgot Password',
-        mail_file: 'verification_mail.ejs',
+        mail_file: 'update_password_mail.ejs',
         data: mailData,
       });
 
@@ -221,24 +257,98 @@ export class AuthService {
     }
   }
 
-  async updatePassword(resetPasswordDto: ResetPasswordDto) {
-    const { otp, password, verification_token } = resetPasswordDto;
+  async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
+    try {
+
+      const { password, new_password } = resetPasswordDto;
+
+      if (password === new_password) throw new UnauthorizedException("Password need to be different");
+
+      const userId = decodeToken(token, this.jwt, this.config);
+      const existsUser = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!existsUser) throw new UnauthorizedException('User does not exist');
+
+      const verified = await argon.verify(existsUser.password, password);
+      if (!verified) throw new UnauthorizedException('Invalid Password !');
+
+      const otp = generateOTP(6);
+
+
+      const hashedPassword = await argon.hash(new_password);
+
+      // sign verification token
+      const payload = {
+        user_id: existsUser.id,
+        personal_mail: existsUser.personal_mail,
+        otp,
+        password: hashedPassword,
+        flag: 'R' // F -> forgot password, R -> reset password
+      };
+
+      const verificationToken = this.jwt.sign(payload, {
+        expiresIn: '5m',
+        secret: this.config.get('JWT_VERIFICATION_SECRET'),
+      });
+
+      // Send email
+
+      const mailData = {
+        otp: otp,
+      };
+
+      await this.mailer.sendMail({
+        email: existsUser.personal_mail,
+        subject: 'Forgot Password',
+        mail_file: 'update_password_mail.ejs',
+        data: mailData,
+      });
+
+      return {
+        verificationToken,
+      };
+    } catch (error) {
+      throw new InternalServerError();
+    }
+  }
+
+  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+    const { otp, password, verification_token } = updatePasswordDto;
     const decoded = this.jwt.verify(verification_token, {
       secret: this.config.get('JWT_VERIFICATION_SECRET'),
     });
 
     if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
 
-    const user = await this.prisma.user.update({
-      where: {
-        id: decoded.user_id,
-        personal_mail: decoded.email,
-      },
-      data: {
-        password: await argon.hash(password),
-      },
-    });
+    const flag = decoded.flag;
+    let user: User;
+    if (flag === 'R') {
+      user = await this.prisma.user.update({
+        where: {
+          id: decoded.user_id,
+          personal_mail: decoded.email,
+        },
+        data: {
+          password: decoded.password
+        }
+      });
+    }
+    else {
+      user = await this.prisma.user.update({
+        where: {
+          id: decoded.user_id,
+          personal_mail: decoded.email,
+        },
+        data: {
+          password: await argon.hash(password),
+        },
+      });
 
+    }
     const access_token = await this.signAccessToken(
       user.id,
       user.personal_mail,

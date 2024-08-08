@@ -37,7 +37,6 @@ model User {
   university_roll String?
   domain          String
   profile_pic_url String?
-  domain          String
   user_type       UserType
   stream          String?
   status          UserStatus
