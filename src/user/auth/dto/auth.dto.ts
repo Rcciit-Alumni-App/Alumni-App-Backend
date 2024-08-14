@@ -1,38 +1,140 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
 
 
 export class SignupDto {
-    @IsEmail()
-    @IsNotEmpty()
-    personal_email: string;
-    @IsEmail()
-    @IsNotEmpty()
-    college_email: string;
+  @ApiProperty({
+    description: 'Personal email of the user',
+    type: String,
+    example: 'john.doe@example.com',
+  })
+  @IsEmail()
+  @IsNotEmpty()
+  personal_email: string;
 
-    @IsString()
-    @IsNotEmpty()
-    college_roll: string;
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+  @ApiProperty({
+    description: 'College email of the user',
+    type: String,
+    example: 'johndoe@college.edu',
+  })
+  @IsEmail()
+  @IsNotEmpty()
+  college_email: string;
+
+  @ApiProperty({
+    description: 'College roll number of the user',
+    type: String,
+    example: 'COL123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  college_roll: string;
+
+  @ApiProperty({
+    description: 'Password for the user account',
+    type: String,
+    example: 'password123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
 }
 
 export class VerifyDto {
-    @IsString()
-    @IsNotEmpty()
-    verification_token: string;
+  @ApiProperty({
+    description: 'Verification token for the user',
+    type: String,
+    example: '<jwt-token>',
+  })
+  @IsString()
+  @IsNotEmpty()
+  verification_token: string;
 
-    @IsString()
-    @IsNotEmpty()
-    otp: string;
+  @ApiProperty({
+    description: 'One-time password (OTP) for verification',
+    type: String,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  otp: string;
 }
 
 export class LoginDto {
-    @IsEmail()
-    @IsNotEmpty()
-    personal_email: string;
+  @ApiProperty({
+    description: 'Personal email of the user for login',
+    type: String,
+    example: 'john.doe@example.com',
+  })
+  @IsEmail()
+  @IsNotEmpty()
+  personal_mail: string;
 
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+  @ApiProperty({
+    description: 'Password for the user account',
+    type: String,
+    example: 'password123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+}
+
+export class UpdatePasswordDto {
+
+  @ApiProperty({
+    description: 'One-time password (OTP) for resetting password',
+    type: String,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  otp: string;
+
+  @ApiProperty({
+    description: 'New password for the user account',
+    type: String,
+    example: 'newpassword123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+
+  @ApiProperty({
+    description: 'Verification token for password reset',
+    type: String,
+    example: '<jwt-token>',
+  })
+  @IsString()
+  @IsNotEmpty()
+  verification_token: string;
+
+}
+export class ResetPasswordDto {
+
+  @ApiProperty({
+    description: 'New password for the user account',
+    type: String,
+    example: 'newpassword123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+
+
+  @ApiProperty({
+    description: 'New password for the user account',
+    type: String,
+    example: 'newpassword123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  new_password: string;
+
+
 }

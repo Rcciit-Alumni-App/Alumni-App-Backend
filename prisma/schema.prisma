@@ -23,30 +23,59 @@ enum UserStatus {
   EDUCATION_DETAILS
   EXPERIENCE_DETAILS
   PROFILE_DETAILS
+  COMPLETED
 }
 
 model User {
-  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
   full_name       String?
-  phone           BigInt?
-  personal_mail   String          @unique
-  college_mail    String          @unique
+  phone           String
+  personal_mail   String            @unique
+  college_mail    String            @unique
   password        String
   college_roll    String
   university_roll String?
+  domain          String
   profile_pic_url String?
   user_type       UserType
   stream          String?
   status          UserStatus
   higher_studies  HigherStudies[]
+  internships     Internships[]
+  workExperiences WorkExperiences[]
 }
 
-model HigherStudies {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  Institute  String
-  Course     String
-  Start_date DateTime
-  End_date   DateTime
-  userId     String   @unique @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+type HigherStudies {
+  id         Int
+  institute  String
+  course     String
+  start_date DateTime
+  end_date   DateTime
+}
+
+type Internships {
+  id         Int
+  company    String
+  role       String
+  start_date DateTime
+  end_date   DateTime
+  skills     String[]
+}
+
+enum WorkStatus {
+  ONGOING
+  EX_EMPLOYEE
+}
+
+model WorkExperiences {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  user_id     String     @db.ObjectId
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  start_date  DateTime
+  end_date    DateTime?
+  status      WorkStatus
+  skills      String[]
+  description String
 }
