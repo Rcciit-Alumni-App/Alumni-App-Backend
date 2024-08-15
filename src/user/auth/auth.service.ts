@@ -10,6 +10,9 @@ import { decodeToken } from '../../../utils/auth/decodeToken';
 import { MailerService } from '../../../src/mailer/mailer.service';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { RedisService } from '../../../src/redis/redis.service';
+import * as csv from 'csv-parser';
+import * as fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class AuthService {
@@ -78,7 +81,7 @@ export class AuthService {
       mail_file: 'verification_mail.ejs',
       data: mailData,
     });
-    console.log(verificationToken);
+
     return {
       verificationToken,
     };
@@ -360,6 +363,51 @@ export class AuthService {
     else
       return this.jwt.signAsync(payload, {
         secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
+      });
+
+  }
+
+  async createUser(file: Express.Multer.File) {
+    const filename = file.filename;
+    const filepath = join(process.cwd(), 'uploads', filename);
+    const results = [];
+    fs.createReadStream(filepath)
+      .pipe(csv())
+      .on("data", (data) => {
+        // // Iterate over the keys of the data object
+        for (const key in data) {
+          data['name'] = data[key];
+          delete data[key];
+          break;
+        }
+
+        results.push(data);
+      })
+      .on("end", async () => {
+        results.map((data) => {
+          data['roll_no'] = data['roll'];
+          delete data['roll'];
+          data['phone_number'] = data['phone'];
+          delete data['phone'];
+          data['passing_year'] = data['passout_year'];
+          delete data['passout_year'];
+        })
+        try {
+          await this.prisma.collegeUser.createMany({
+            data: results
+          });
+        } catch (error) {
+          console.log(error);
+        }
+        finally {
+          fs.unlink(filepath, (err) => {
+            if (err) {
+              console.error('Error deleting file:', err);
+            } else {
+              console.log('File deleted successfully.');
+            }
+          });
+        }
       });
 
   }

@@ -1,25 +1,32 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
-export class InsertDocumentDto {
+export class CollegeUser {
+
+    @IsEmail()
+    @IsNotEmpty()
+    college_mail: string;
+
+    @IsEmail()
+    @IsNotEmpty()
+    personal_mail: string;
+
     @IsString()
     @IsNotEmpty()
     name: string;
+
     @IsString()
     @IsNotEmpty()
     roll_no: string;
+
     @IsString()
     @IsNotEmpty()
     stream: string;
+
     @IsString()
     @IsNotEmpty()
-    passing_year: string;
+    year_of_passing: string;
+
     @IsString()
     @IsNotEmpty()
     phone_number: string;
-    @IsString()
-    @IsNotEmpty()
-    personal_mail: string;
-    @IsString()
-    @IsNotEmpty()
-    college_mail: string;
 }

@@ -16,6 +16,7 @@ datasource db {
 enum UserType {
   STUDENT
   ALUMNI
+  ADMIN
 }
 
 enum UserStatus {
@@ -29,12 +30,12 @@ enum UserStatus {
 model CollegeUser {
   id            String @id @default(auto()) @map("_id") @db.ObjectId
   name          String
-  roll_no       String
+  roll_no       String @unique
   stream        String
   passing_year  String
   phone_number  String
   personal_mail String
-  college_mail  String
+  college_mail  String @unique
 
   @@index([college_mail, personal_mail])
 }

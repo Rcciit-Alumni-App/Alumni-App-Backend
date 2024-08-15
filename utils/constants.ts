@@ -1,3 +1,5 @@
+import { join } from "path";
+
 export const AUTH_SECRETS = {
     JWT_AUTHENTICATION_SECRET: 'JWT_AUTHENTICATION_SECRET',
     JWT_VERIFICATION_SECRET: 'JWT_VERIFICATION_SECRET'
@@ -12,3 +14,4 @@ export const MAIL_OPTIONS = {
     DEFAULT_MAIL_FROM: 'DEFAULT_MAIL_FROM'
 };
 
+export const FILE_UPLOAD_DIR = join(process.cwd(), 'uploads');
