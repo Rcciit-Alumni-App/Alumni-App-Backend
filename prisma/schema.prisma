@@ -58,6 +58,8 @@ model User {
   internships     Internships[]
   workExperiences WorkExperiences[]
   jobs            Jobs[]            @relation("UserJobs")
+  news            News[]            @relation("UserNews")
+  comments        Comments[]        @relation("UserComments")
 }
 
 type HigherStudies {
@@ -122,3 +124,33 @@ model Jobs {
   posted_at            DateTime      @default(now())
   application_deadline DateTime
 }
+
+model News {
+  id                 String         @id @default(auto()) @map("_id") @db.ObjectId 
+  author_id          String         @db.ObjectId
+  title              String
+  description        String
+  banner             String?
+  tags               String[]
+  likes              Int
+  views              Int
+  reports            String[]
+  admin_approval     Boolean
+  user               User        @relation(fields: [author_id], references: [id], onDelete: Cascade, name: "UserNews")
+  comments           Comments[]  @relation("NewsComments")
+}
+
+model Comments {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  news_id   String   @db.ObjectId
+  user_id   String   @db.ObjectId
+  isEdited  Boolean  @default(false)
+  comment   String
+
+  news      News     @relation(fields: [news_id], references: [id], onDelete: Cascade, name: "NewsComments")
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade, name: "UserComments") // Updated relation name
+}
+
+
+
+

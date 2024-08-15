@@ -93,16 +93,25 @@ export class AuthService {
 
   async verify(verifyDto: VerifyDto) {
     const { otp, verification_token } = verifyDto;
+    
     // Get token and otp
     const decoded = this.jwt.verify(verification_token, {
       secret: this.config.get('JWT_VERIFICATION_SECRET'),
     });
-
-
+  
     // Decode the token and check with otp
     if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
+  
+    // Check if the personal email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        personal_mail: decoded.personal_email,
+      },
+    });
+  
+    if (existingUser) throw new UnauthorizedException('User already exists with this personal email');
+  
     // Save the user to database
-
     const user = await this.prisma.user.create({
       data: {
         full_name: '',
@@ -119,20 +128,19 @@ export class AuthService {
         university_roll: '',
       },
     });
-
+  
     // Sign access_token and return
-
     const access_token = await this.signAccessToken(
       user.id,
       user.personal_mail,
       user.user_type,
       false
     );
-
+  
     delete user.password;
     // Save to redis
     this.redis.setCache(user.id, user);
-
+  
     return {
       access_token,
     };
