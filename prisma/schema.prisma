@@ -16,6 +16,7 @@ datasource db {
 enum UserType {
   STUDENT
   ALUMNI
+  ADMIN
 }
 
 enum UserStatus {
@@ -26,9 +27,17 @@ enum UserStatus {
   COMPLETED
 }
 
-enum JobTypes {
-    JOB
-    INTERNSHIP
+model CollegeUser {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  roll_no       String @unique
+  stream        String
+  passing_year  String
+  phone_number  String
+  personal_mail String
+  college_mail  String @unique
+
+  @@index([college_mail, personal_mail])
 }
 
 model User {
@@ -89,26 +98,30 @@ model WorkExperiences {
 }
 
 model JobCategories {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  name  String  @unique
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
 
-  jobs  Jobs[]  @relation("CategoryJobs")
+  jobs Jobs[] @relation("CategoryJobs")
 }
 
+enum JobTypes {
+  JOB
+  INTERNSHIP
+}
 
 model Jobs {
-  id                   String         @id @default(auto()) @map("_id") @db.ObjectId 
-  category_id          String         @db.ObjectId
-  category             JobCategories  @relation(fields: [category_id], references: [id], onDelete: Cascade, name: "CategoryJobs")
-  created_by           String         @db.ObjectId
-  user                 User           @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
+  id                   String        @id @default(auto()) @map("_id") @db.ObjectId
+  category_id          String        @db.ObjectId
+  category             JobCategories @relation(fields: [category_id], references: [id], onDelete: Cascade, name: "CategoryJobs")
+  created_by           String        @db.ObjectId
+  user                 User          @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
   title                String
   company_name         String
   description          String
   apply_link           String
   location             String
   job_type             JobTypes
-  posted_at            DateTime       @default(now())
+  posted_at            DateTime      @default(now())
   application_deadline DateTime
 }
 

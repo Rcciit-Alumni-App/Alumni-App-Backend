@@ -6,6 +6,7 @@ import Mail from 'nodemailer/lib/mailer';
 import * as path from 'path';
 import * as ejs from 'ejs';
 import * as fs from 'fs';
+// import { MAIL_OPTIONS } from 'utils/constants';
 
 @Injectable()
 export class MailerService {
@@ -15,12 +16,12 @@ export class MailerService {
     mailTransport() {
         const transport = nodemailer.createTransport({
             service: "gmail",
-            host: this.config.get<string>("MAIL_HOST"),
-            port: this.config.get<number>("MAIL_PORT"),
+            host: this.config.get<string>('MAIL_HOST'),
+            port: this.config.get<number>('MAIL_PORT'),
             secure: false,
             auth: {
-                user: this.config.get<string>("MAIL_USER"),
-                pass: this.config.get<string>("MAIL_PASSWORD")
+                user: this.config.get<string>('MAIL_USER'),
+                pass: this.config.get<string>('MAIL_PASSWORD')
             }
         });
 
@@ -34,7 +35,7 @@ export class MailerService {
             throw new Error(`Template file not found: ${templatePath}`);
         }
         const html: string = await ejs.renderFile(templatePath, data);
-
+        
         const transport = this.mailTransport();
         const options: Mail.Options = {
             from: this.config.get("DEFAULT_MAIL_FROM"),
@@ -42,7 +43,7 @@ export class MailerService {
             subject,
             html,
         };
-
+        
         try {
             const result = await transport.sendMail(options);
             return result;
