@@ -1,11 +1,17 @@
-import { Body, Controller, Delete, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Post, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { verifyRollNo } from '../../../utils/auth/verify_roll_no';
 import { Token } from '../../../utils/decorators/token.decorator';
 import { Throttle } from '@nestjs/throttler';
+import { JwtAuthGuard } from './guards';
+import { Role, Roles } from 'utils/decorators/role.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { FILE_UPLOAD_DIR } from 'utils/constants';
+import { filenameEditor } from 'utils/file/file-name-editor';
+import { imageFileFilter } from 'utils/file/image-file-filter';
 @ApiTags('Authentication Flow')
 @Controller('user/auth')
 export class AuthController {
@@ -253,4 +259,20 @@ export class AuthController {
   }
 
 
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  @Post("/create-users")
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: FILE_UPLOAD_DIR,
+      filename: filenameEditor,
+    }),
+    limits: {
+      fileSize: 1000 * 1000 * 10
+    },
+    fileFilter: imageFileFilter,
+  }))
+  async createUser(@Token() token: string, @UploadedFile() file: Express.Multer.File) {
+    return this.authService.createUser(file);
+  }
 }
