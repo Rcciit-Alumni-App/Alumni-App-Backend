@@ -26,6 +26,11 @@ enum UserStatus {
   COMPLETED
 }
 
+enum JobTypes {
+    JOB
+    INTERNSHIP
+}
+
 model User {
   id              String            @id @default(auto()) @map("_id") @db.ObjectId
   full_name       String?
@@ -43,6 +48,7 @@ model User {
   higher_studies  HigherStudies[]
   internships     Internships[]
   workExperiences WorkExperiences[]
+  jobs            Jobs[]            @relation("UserJobs")
 }
 
 type HigherStudies {
@@ -79,3 +85,29 @@ model WorkExperiences {
   skills      String[]
   description String
 }
+
+model JobCategories {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  name  String  @unique
+
+  jobs  Jobs[]  @relation("CategoryJobs")
+}
+
+
+model Jobs {
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId 
+  category_id          String         @db.ObjectId
+  category             JobCategories  @relation(fields: [category_id], references: [id], onDelete: Cascade, name: "CategoryJobs")
+  created_by           String         @db.ObjectId
+  user                 User           @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
+  title                String
+  company_name         String
+  description          String
+  apply_link           String
+  location             String
+  job_type             JobTypes
+  posted_at            DateTime       @default(now())
+  application_deadline DateTime
+}
+
+
