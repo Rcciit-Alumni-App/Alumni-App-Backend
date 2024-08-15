@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import { User, UserStatus, UserType } from '@prisma/client';
 import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
 import { verifyAlumniStudent } from '../../../utils/auth/verify_alumni_student';
-import { InternalServerError } from '../../../utils/errors/server-error';
 import { generateOTP } from '../../../utils/auth/generate_otp';
 import { decodeToken } from '../../../utils/auth/decodeToken';
 import { MailerService } from '../../../src/mailer/mailer.service';
