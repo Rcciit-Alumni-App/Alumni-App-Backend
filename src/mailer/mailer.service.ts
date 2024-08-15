@@ -29,7 +29,7 @@ export class MailerService {
 
     async sendMail(sendMailDto: SendMailDto) {
         const { email, subject, mail_file, data } = sendMailDto;
-        const templatePath = path.join(__dirname, '../../mails', mail_file);
+        const templatePath = path.join(__dirname, '../../../mails', mail_file);
         if (!fs.existsSync(templatePath)) {
             throw new Error(`Template file not found: ${templatePath}`);
         }

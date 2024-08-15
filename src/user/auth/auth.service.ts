@@ -84,50 +84,58 @@ export class AuthService {
   }
 
   async verify(verifyDto: VerifyDto) {
-      const { otp, verification_token } = verifyDto;
-      // Get token and otp
-      const decoded = this.jwt.verify(verification_token, {
-        secret: this.config.get('JWT_VERIFICATION_SECRET'),
-      });
-
-
-      // Decode the token and check with otp
-      if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
-      // Save the user to database
-
-      const user = await this.prisma.user.create({
-        data: {
-          full_name: '',
-          phone: '',
-          college_mail: decoded.college_email,
-          personal_mail: decoded.personal_email,
-          college_roll: decoded.college_roll,
-          domain: '',
-          password: decoded.password,
-          stream: decoded.stream,
-          status: UserStatus.ACCOUNT_DETAILS,
-          user_type: decoded.user_type,
-          profile_pic_url: '',
-          university_roll: '',
-        },
-      });
-
-      // Sign access_token and return
-
-      const access_token = await this.signAccessToken(
-        user.id,
-        user.personal_mail,
-        user.user_type,
-        false
-      );
-
-      delete user.password;
-      // Save to redis
-      this.redis.setCache(user.id, user);
-
-      return {
-        access_token,
-      };
+    const { otp, verification_token } = verifyDto;
+    
+    // Get token and otp
+    const decoded = this.jwt.verify(verification_token, {
+      secret: this.config.get('JWT_VERIFICATION_SECRET'),
+    });
+  
+    // Decode the token and check with otp
+    if (decoded.otp !== otp) throw new UnauthorizedException('Wrong OTP');
+  
+    // Check if the personal email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        personal_mail: decoded.personal_email,
+      },
+    });
+  
+    if (existingUser) throw new UnauthorizedException('User already exists with this personal email');
+  
+    // Save the user to database
+    const user = await this.prisma.user.create({
+      data: {
+        full_name: '',
+        phone: '',
+        college_mail: decoded.college_email,
+        personal_mail: decoded.personal_email,
+        college_roll: decoded.college_roll,
+        domain: '',
+        password: decoded.password,
+        stream: decoded.stream,
+        status: UserStatus.ACCOUNT_DETAILS,
+        user_type: decoded.user_type,
+        profile_pic_url: '',
+        university_roll: '',
+      },
+    });
+  
+    // Sign access_token and return
+    const access_token = await this.signAccessToken(
+      user.id,
+      user.personal_mail,
+      user.user_type,
+      false
+    );
+  
+    delete user.password;
+    // Save to redis
+    this.redis.setCache(user.id, user);
+  
+    return {
+      access_token,
+    };
   }
 
   async resendOTP(token: string) {

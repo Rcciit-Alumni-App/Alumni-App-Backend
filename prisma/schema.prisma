@@ -50,6 +50,7 @@ model User {
   workExperiences WorkExperiences[]
   jobs            Jobs[]            @relation("UserJobs")
   news            News[]            @relation("UserNews")
+  comments        Comments[]        @relation("UserComments")
 }
 
 type HigherStudies {
@@ -122,9 +123,8 @@ model News {
   views              Int
   reports            String[]
   admin_approval     Boolean
-  user           User        @relation(fields: [author_id], references: [id], onDelete: Cascade, name: "UserNews")
-  reports        Report[]    @relation("NewsReports")
-  comments       Comments[]  @relation("NewsComments")
+  user               User        @relation(fields: [author_id], references: [id], onDelete: Cascade, name: "UserNews")
+  comments           Comments[]  @relation("NewsComments")
 }
 
 model Comments {
@@ -135,8 +135,9 @@ model Comments {
   comment   String
 
   news      News     @relation(fields: [news_id], references: [id], onDelete: Cascade, name: "NewsComments")
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade, name: "UserComments") // Updated relation name
 }
+
 
 
 
