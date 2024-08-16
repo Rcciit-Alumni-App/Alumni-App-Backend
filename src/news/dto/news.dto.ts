@@ -6,9 +6,6 @@ import {
 
 export class CreateNewsDto {
     @IsString()
-    author_id: string;
-
-    @IsString()
     title: string;
 
     @IsString()
