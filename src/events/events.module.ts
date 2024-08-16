@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
+import { EventsService } from './events.service';
+import { EventsController } from './events.controller';
 import { RedisModule } from 'src/redis/redis.module';
-import { JobService } from './jobs.service';
-import { JobController } from './jobs.controller';
-import { AuthModule } from 'src/user/auth/auth.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    AuthModule,
     RedisModule,
     ThrottlerModule.forRoot([
       {
@@ -17,13 +15,13 @@ import { APP_GUARD } from '@nestjs/core';
       }
     ])
   ],
-  controllers: [JobController],
+  controllers: [EventsController],
   providers: [
-    JobService,
+    EventsService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
     }
   ],
 })
-export class JobModule {}
+export class EventsModule { }
