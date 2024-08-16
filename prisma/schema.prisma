@@ -168,8 +168,8 @@ model EventInterests {
 }
 
 type NewsActivity {
-  total_likes    BigInt
-  total_comments BigInt
+  total_likes    Int
+  total_comments Int
 }
 
 model News {
