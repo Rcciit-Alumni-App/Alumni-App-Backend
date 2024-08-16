@@ -30,6 +30,29 @@ export class CommentsService {
             }
         });
 
+        const news = await this.prisma.news.findFirst({
+            where: {
+                id: createCommentDto.newsId
+            },
+            select: {
+                activities: true
+            }
+        });
+
+        const updatedActivities = {
+            total_comments: (news.activities.total_comments ?? 0) + 1,
+            total_likes: news.activities?.total_likes ?? 0,  // Ensure other fields are preserved
+        };
+
+        await this.prisma.news.update({
+            where: {
+                id: createCommentDto.newsId
+            },
+            data: {
+                activities: updatedActivities
+            }
+        })
+
         return comment;
     }
 
