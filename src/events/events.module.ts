@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { NewsController } from './news.controller';
-import { NewsService } from './news.service';
+import { EventsService } from './events.service';
+import { EventsController } from './events.controller';
 import { RedisModule } from 'src/redis/redis.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -15,13 +15,13 @@ import { APP_GUARD } from '@nestjs/core';
       }
     ])
   ],
-  controllers: [NewsController],
+  controllers: [EventsController],
   providers: [
-    NewsService,
+    EventsService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
     }
-  ]
+  ],
 })
-export class NewsModule { }
+export class EventsModule { }

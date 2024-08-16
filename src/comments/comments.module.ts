@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { NewsController } from './news.controller';
-import { NewsService } from './news.service';
+import { CommentsController } from './comments.controller';
+import { CommentsService } from './comments.service';
 import { RedisModule } from 'src/redis/redis.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -15,13 +15,13 @@ import { APP_GUARD } from '@nestjs/core';
       }
     ])
   ],
-  controllers: [NewsController],
+  controllers: [CommentsController],
   providers: [
-    NewsService,
+    CommentsService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
     }
   ]
 })
-export class NewsModule { }
+export class CommentsModule { }

@@ -3,79 +3,141 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
+import { CreateNewsDto, UpdateNewsDto } from './dto';
 import { decodeToken } from 'utils/auth/decodeToken';
-import { CreateNewsDto, UpdateNewsDto } from './dto/news.dto';
 
 @Injectable()
 export class NewsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
-    private readonly config: ConfigService,
-    private readonly redis: RedisService,
-  ) {}
-  async getAllNews(token: string) {
-    const userId = decodeToken(token, this.jwt, this.config);
-    const user = await this.redis.getValue(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-    const news = await this.prisma.news.findMany();
-    return news;
-  }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly jwt: JwtService,
+        private readonly config: ConfigService,
+        private readonly redis: RedisService
+    ) { }
 
-  async getNewsById(token: string, id: string) {
-    const userId = decodeToken(token, this.jwt, this.config);
-    const user = await this.redis.getValue(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-    const news = await this.prisma.news.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    return news;
-  }
+    async createNews(token: string, createNewsDto: CreateNewsDto) {
+        const userId = decodeToken(token, this.jwt, this.config);
+        const user = await this.redis.getValue(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
 
-  async createNews(token: string, data: CreateNewsDto) {
-    const userId = decodeToken(token, this.jwt, this.config);
-    const user = await this.redis.getValue(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+        const post = await this.prisma.news.create({
+            data: {
+                ...createNewsDto,
+                author_id: userId,
+                activities: {
+                    total_likes: 0,
+                    total_comments: 0
+                }
+            }
+        });
+        return post;
     }
-    const news = await this.prisma.news.create({
-      data: {
-        ...data,
-      },
-    });
-    return news;
-  }
 
-  async updateNews(token: string, data: UpdateNewsDto) {
-    const userId = decodeToken(token, this.jwt, this.config);
-    const user = await this.redis.getValue(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-    const news = await this.prisma.news.update({
-      where: { id: data.id },
-      data: {
-        ...data,
-      },
-    });
-    return news;
-  }
+    async updateNews(token: string, postId: string, updateNewsDto: UpdateNewsDto) {
+        const userId = decodeToken(token, this.jwt, this.config);
+        const user = await this.redis.getValue(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
 
-  async deleteNews(token: string, id: string) {
-    const userId = decodeToken(token, this.jwt, this.config);
-    const user = await this.redis.getValue(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+        const existsPost = await this.prisma.news.findFirst({
+            where: {
+                id: postId,
+                author_id: userId,
+            },
+        });
+
+        if (!existsPost) {
+            throw new Error("Post not found!!");
+        }
+
+        const updatedPost = await this.prisma.news.update({
+            where: {
+                id: existsPost.id
+            },
+            data: {
+                ...updateNewsDto
+            }
+        });
+
+        return updatedPost;
     }
-    await this.prisma.news.delete({
-      where: { id },
-    });
-    return 'News deleted successfully';
-  }
+
+    async deleteNews(token: string, postId: string) {
+        const userId = decodeToken(token, this.jwt, this.config);
+        const user = await this.redis.getValue(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+
+        const existsPost = await this.prisma.news.findFirst({
+            where: {
+                id: postId,
+                author_id: userId,
+            },
+        });
+
+        if (!existsPost) {
+            throw new Error("Post not found!!");
+        }
+        await this.prisma.news.delete({
+            where: {
+                id: postId,
+                author_id: userId,
+            }
+        });
+    }
+
+    async getAllNews(skip: number, limit: number) {
+        const news = await this.prisma.news.findMany({
+            skip: skip,
+            take: limit,
+        });
+
+        return news;
+    }
+
+    async getNews(id: string) {
+        let news: any;
+        news = await this.redis.getValue(`news:${id}`);
+        if (news)
+            return news;
+        news = await this.prisma.news.findFirst({
+            where: {
+                id: id,
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                banner: true,
+                tags: true,
+                created_at: true,
+                updated_at: true,
+                activities: true,
+                comment: {
+                    take: 10,
+                    select: {
+                        id: true,
+                        comment: true,
+                        isEdited: true,
+                        created_at: true,
+                        updated_at: true,
+                        user: {
+                            select: {
+                                id: true,
+                                full_name: true, // Include any other user fields you want
+                            },
+                        }
+                    }
+                }
+            }
+        });
+
+        this.redis.setCache(`news:${news.id}`, news);
+
+        return news;
+    }
 }

@@ -1,35 +1,36 @@
-import { Body, Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { NewsService } from "./news.service";
-import { JwtAuthGuard } from "src/user/auth/guards/jwt.guard";
-import { Token } from "utils/decorators/token.decorator";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { NewsService } from './news.service';
+import { CreateNewsDto, UpdateNewsDto } from './dto';
+import { JwtAuthGuard } from 'src/user/auth/guards';
+import { Token } from 'utils/decorators/token.decorator';
 
-
-@Controller('/news')
+@UseGuards(JwtAuthGuard)
+@Controller('news')
 export class NewsController {
-  constructor(private readonly newsService: NewsService) {}
-  @UseGuards(JwtAuthGuard)
-  @Get('/all')
-  async getAllNews(
-    @Token() token: string,
-  ) {
-    return this.newsService.getAllNews(token);
-  }
+    constructor(private readonly newsService: NewsService) { }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/:id')
-  async getNewsById(
-    @Token() token: string,
-    @Query('id') id: string,
-  ) {
-    return this.newsService.getNewsById(token,id);
-  }
+    @Post("/create-post")
+    async createPost(@Token() token: string, @Body() createNewsDto: CreateNewsDto) {
+        return this.newsService.createNews(token, createNewsDto);
+    }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/create')
-  async createNews(
-    @Token() token: string,
-    @Body() data: any,
-  ) {
-    return this.newsService.createNews(token,data);
-  }
+    @Put("/update-post")
+    async updatePost(@Token() token: string, @Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
+        return this.newsService.updateNews(token, id, updateNewsDto);
+    }
+
+    @Delete("/delete-post")
+    async deletePost(@Token() token: string, @Param("id") id: string) {
+        return this.newsService.deleteNews(token, id);
+    }
+
+    @Get("/get-all")
+    async getAllNews(@Token() token: string, @Query('skip') skip: number, @Query('limit') limit: number) {
+        return this.newsService.getAllNews(skip, limit);
+    }
+
+    @Get("/get")
+    async getNews(@Token() token: string, @Param("id") id: string) {
+        return this.newsService.getNews(id);
+    }
 }
