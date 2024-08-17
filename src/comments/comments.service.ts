@@ -103,6 +103,28 @@ export class CommentsService {
         if (existsComment)
             throw new Error("Comment doesn't exists");
 
+        const news = await this.prisma.news.findFirst({
+            where: {
+                id: existsComment.newsId
+            },
+            select: {
+                activities: true
+            }
+        });
+
+        const updatedActivities = {
+            total_comments: (news.activities.total_comments ?? 0) - 1,
+            total_likes: news.activities?.total_likes ?? 0,  // Ensure other fields are preserved
+        };
+
+        await this.prisma.news.update({
+            where: {
+                id: existsComment.newsId
+            },
+            data: {
+                activities: updatedActivities
+            }
+        })
         await this.prisma.comment.delete({
             where: {
                 id: existsComment.id,
@@ -121,7 +143,19 @@ export class CommentsService {
                 newsId: newsId
             },
             skip: skip,
-            take: limit
+            take: limit,
+            select: {
+                id: true,
+                comment: true,
+                isEdited: true,
+                user: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        profile_pic_url: true
+                    }
+                }
+            }
         });
 
         this.redis.setCache(`comment:${newsId}:${skip}:${limit}`, comments);

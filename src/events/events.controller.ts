@@ -23,7 +23,7 @@ export class EventsController {
     @ApiOperation({ summary: 'Retrieve a single event by ID' })
     @ApiResponse({ status: 200, description: 'Event retrieved successfully.' })
     @ApiResponse({ status: 404, description: 'Event not found.' })
-    @Get("/get")
+    @Get("/get/:id")
     async getEvent(@Param("id") id: string) {
         return this.eventService.getEvent(id);
     }
@@ -41,7 +41,7 @@ export class EventsController {
     @ApiResponse({ status: 200, description: 'Event updated successfully.' })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Event not found.' })
-    @Put("/update")
+    @Put("/update/:id")
     @Roles(Role.ADMIN)
     async updateEvent(@Token() token: string, @Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
         return this.eventService.updateEvent(token, id, updateEventDto);
@@ -51,7 +51,7 @@ export class EventsController {
     @ApiResponse({ status: 200, description: 'Event deleted successfully.' })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Event not found.' })
-    @Delete("/delete")
+    @Delete("/delete/:id")
     @Roles(Role.ADMIN)
     async deleteEvent(@Token() token: string, @Param('id') id: string) {
         return this.eventService.deleteEvent(token, id);

@@ -4,7 +4,7 @@ import { Token } from 'utils/decorators/token.decorator';
 import { JwtAuthGuard } from 'src/user/auth/guards/jwt.guard';
 import { JobTypes } from '@prisma/client';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-@ApiTags('events')
+@ApiTags('jobs')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('/opportunities')

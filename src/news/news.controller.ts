@@ -22,7 +22,7 @@ export class NewsController {
     @ApiOperation({ summary: 'Update an existing news post' })
     @ApiResponse({ status: 200, description: 'The news post has been successfully updated.' })
     @ApiParam({ name: 'id', description: 'ID of the news post to update' })
-    @Put("/update-post")
+    @Put("/update-post/:id")
     async updatePost(@Token() token: string, @Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
         return this.newsService.updateNews(token, id, updateNewsDto);
     }
@@ -30,7 +30,7 @@ export class NewsController {
     @ApiOperation({ summary: 'Delete a news post' })
     @ApiResponse({ status: 200, description: 'The news post has been successfully deleted.' })
     @ApiParam({ name: 'id', description: 'ID of the news post to delete' })
-    @Delete("/delete-post")
+    @Delete("/delete-post/:id")
     async deletePost(@Token() token: string, @Param("id") id: string) {
         return this.newsService.deleteNews(token, id);
     }
@@ -47,7 +47,7 @@ export class NewsController {
     @ApiOperation({ summary: 'Get a single news post by ID' })
     @ApiResponse({ status: 200, description: 'The news post details' })
     @ApiParam({ name: 'id', description: 'ID of the news post to retrieve' })
-    @Get("/get")
+    @Get("/get/:id")
     async getNews(@Token() token: string, @Param("id") id: string) {
         return this.newsService.getNews(id);
     }
