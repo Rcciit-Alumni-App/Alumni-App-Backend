@@ -21,7 +21,7 @@ import { CommentsModule } from './comments/comments.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_AUTHENTICATION_SECRET'),
-        signOptions: { expiresIn: '60m' },
+        // signOptions: { expiresIn: '60m' },
       }),
       inject: [ConfigService],
       global: true,

@@ -23,7 +23,7 @@ export class CommentsController {
     @ApiResponse({ status: 200, description: 'Comment updated successfully.' })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Comment not found.' })
-    @Put("/update")
+    @Put("/update/:id")
     async updateComment(@Token() token: string, @Param('id') id: string, comment: string) {
         return this.commentService.updateComment(token, id, comment);
     }
@@ -32,7 +32,7 @@ export class CommentsController {
     @ApiResponse({ status: 200, description: 'Comment deleted successfully.' })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Comment not found.' })
-    @Delete("/delete")
+    @Delete("/delete/:id")
     async deleteComment(@Token() token: string, @Param('id') id: string) {
         return this.commentService.deleteComment(token, id);
     }
