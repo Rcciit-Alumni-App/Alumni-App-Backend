@@ -19,6 +19,13 @@ export class EventsService {
         const events = await this.prisma.events.findMany({
             skip: skip,
             take: take,
+            select:{
+                id: true,
+                event_name: true,
+                banner_image: true,
+                schedule: true,
+                description: true,
+            }
         });
         events.map((event) => {
             this.redis.setCache(event.id, event);
