@@ -36,11 +36,11 @@ class Announcement {
 
 export class CreateEventDto {
     @ApiProperty({
-        description: 'URL of the event image',
-        example: 'https://example.com/event-image.jpg',
+        description: 'URL of the event name',
+        example: 'GDG',
     })
     @IsString()
-    event_image: string;
+    event_name: string;
 
     @ApiProperty({
         description: 'URL of the banner image',

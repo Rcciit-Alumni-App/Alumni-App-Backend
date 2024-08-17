@@ -44,7 +44,7 @@ export class EventsService {
                 banner_image: true,
                 images: true,
                 announcements: true,
-                event_image: true,
+                event_name: true,
                 rules: true,
                 description: true,
                 attractions: true,
