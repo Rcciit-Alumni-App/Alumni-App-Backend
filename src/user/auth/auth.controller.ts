@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Post, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
 import { AuthService } from './auth.service';
 import { verifyRollNo } from '../../../utils/auth/verify_roll_no';
@@ -259,6 +259,20 @@ export class AuthController {
   }
 
 
+  @ApiOperation({
+    summary: 'Create a new user with an uploaded file',
+    description: 'Creates a new user based on the provided file. The file must be an image and can be up to 10 MB in size.',
+  })
+  @ApiBearerAuth('Authorization') // If you are using Bearer token for authentication
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request, possibly due to invalid file or file size exceeding limit.',
+  })
+  @ApiConsumes('multipart/form-data')
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard)
   @Post("/create-users")

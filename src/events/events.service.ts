@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { decodeToken } from 'utils/auth/decodeToken';
 import { RedisService } from 'src/redis/redis.service';
-import { Events } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
@@ -20,6 +19,13 @@ export class EventsService {
         const events = await this.prisma.events.findMany({
             skip: skip,
             take: take,
+            select:{
+                id: true,
+                event_name: true,
+                banner_image: true,
+                schedule: true,
+                description: true,
+            }
         });
         events.map((event) => {
             this.redis.setCache(event.id, event);
@@ -29,7 +35,7 @@ export class EventsService {
 
     async getEvent(id: string) {
 
-        let event: Events;
+        let event: any;
         event = await this.redis.getValue(`event:${event.id}`);
         if (event)
             return event;
@@ -37,6 +43,20 @@ export class EventsService {
         event = await this.prisma.events.findFirst({
             where: {
                 id: id
+            },
+            select: {
+                id: true,
+                venue: true,
+                schedule: true,
+                banner_image: true,
+                images: true,
+                announcements: true,
+                event_name: true,
+                rules: true,
+                description: true,
+                attractions: true,
+                eventInterests: true,
+                created_at: true,
             }
         });
 

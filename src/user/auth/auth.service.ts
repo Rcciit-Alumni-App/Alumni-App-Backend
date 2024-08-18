@@ -134,7 +134,7 @@ export class AuthService {
       user.id,
       user.personal_mail,
       user.user_type,
-      false
+      // false
     );
   
     delete user.password;
@@ -195,7 +195,7 @@ export class AuthService {
       user.id,
       user.personal_mail,
       user.user_type,
-      false
+      // false
     );
 
     delete user.password;
@@ -344,7 +344,7 @@ export class AuthService {
       user.id,
       user.personal_mail,
       user.user_type,
-      false
+      // false
     );
     return {
       access_token,
@@ -355,7 +355,7 @@ export class AuthService {
     userId: string,
     email: string,
     userType: UserType,
-    willExpire: boolean,
+    // willExpire: boolean,
   ): Promise<string> {
     const payload = {
       sub: userId,
@@ -363,12 +363,12 @@ export class AuthService {
       userType,
     };
 
-    if (willExpire)
-      return this.jwt.signAsync(payload, {
-        expiresIn: '7d',
-        secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
-      });
-    else
+    // if (willExpire)
+    //   return this.jwt.signAsync(payload, {
+    //     expiresIn: '7d',
+    //     secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
+    //   });
+    // else
       return this.jwt.signAsync(payload, {
         secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
       });

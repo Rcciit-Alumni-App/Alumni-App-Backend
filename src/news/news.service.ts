@@ -110,6 +110,13 @@ export class NewsService {
             },
             select: {
                 id: true,
+                author: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        profile_pic_url: true
+                    }
+                },
                 title: true,
                 description: true,
                 banner: true,
@@ -135,6 +142,8 @@ export class NewsService {
                 }
             }
         });
+
+        console.log(news);
 
         this.redis.setCache(`news:${news.id}`, news);
 
