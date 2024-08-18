@@ -12,13 +12,13 @@ export class CreateJobDto {
   @IsString()
   category_id: string;
 
-  @ApiProperty({
-    description: 'The ID of the user who created the job',
-    example: 'user-456',
-  })
-  @IsNotEmpty()
-  @IsString()
-  created_by: string;
+  // @ApiProperty({
+  //   description: 'The ID of the user who created the job',
+  //   example: 'user-456',
+  // })
+  // @IsNotEmpty()
+  // @IsString()
+  // created_by: string;
 
   @ApiProperty({
     description: 'The title of the job opportunity',
@@ -68,13 +68,13 @@ export class CreateJobDto {
   @IsEnum(JobTypes)
   job_type: JobTypes;
 
-  @ApiPropertyOptional({
-    description: 'The date when the job was posted',
-    example: '2024-08-17T00:00:00Z',
-  })
-  @IsOptional()
-  @IsDateString()
-  posted_at?: Date;
+  // @ApiPropertyOptional({
+  //   description: 'The date when the job was posted',
+  //   example: '2024-08-17T00:00:00Z',
+  // })
+  // @IsOptional()
+  // @IsDateString()
+  // posted_at?: Date;
 
   @ApiProperty({
     description: 'The deadline for applying to the job',

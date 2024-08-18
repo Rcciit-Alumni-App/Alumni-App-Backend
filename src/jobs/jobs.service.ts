@@ -5,7 +5,7 @@ import { JobTypes } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RedisService } from "src/redis/redis.service";
 import { decodeToken } from "utils/auth/decodeToken";
-import { UpdateJobDto } from "./dto/jobs.dto";
+import { CreateJobDto, UpdateJobDto } from "./dto/jobs.dto";
 
 @Injectable()
 export class JobService {
@@ -25,7 +25,7 @@ export class JobService {
     return jobs;
   }
 
-  async createJob(token: string, data: any) {
+  async createJob(token: string, data: CreateJobDto) {
     const userId = decodeToken(token, this.jwt, this.config);
     const user = await this.redis.getValue(userId);
     if (!user) {
