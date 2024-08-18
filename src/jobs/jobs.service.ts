@@ -21,6 +21,19 @@ export class JobService {
         job_type: jobType,
         category_id: category,
       },
+      select: {
+        id: true,
+        title: true,
+        company_name: true,
+        description: true,
+        job_type: true,
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
     });
     return jobs;
   }
@@ -55,7 +68,7 @@ export class JobService {
     return job;
   }
 
-  async getJobById(token: string,id: string) {
+  async getJobById(token: string, id: string) {
     const userId = decodeToken(token, this.jwt, this.config);
     const user = await this.redis.getValue(userId);
     if (!user) {
