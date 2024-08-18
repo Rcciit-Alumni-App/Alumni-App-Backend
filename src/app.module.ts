@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MailerModule } from './mailer/mailer.module';
 import { RedisModule } from './redis/redis.module';
+import { JobModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RedisModule } from './redis/redis.module';
       global: true, 
     }),
     UserModule,
+    JobModule,
     PrismaModule,
     MailerModule,
     RedisModule,
