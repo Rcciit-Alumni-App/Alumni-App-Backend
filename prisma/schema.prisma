@@ -126,9 +126,9 @@ model Jobs {
   user                 User          @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
   title                String
   company_name         String
-  description          String
-  apply_link           String
-  location             String
+  description          String?
+  apply_link           String?
+  location             String?
   job_type             JobTypes
   posted_at            DateTime      @default(now())
   application_deadline DateTime

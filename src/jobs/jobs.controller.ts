@@ -4,6 +4,7 @@ import { Token } from 'utils/decorators/token.decorator';
 import { JwtAuthGuard } from 'src/user/auth/guards/jwt.guard';
 import { JobTypes } from '@prisma/client';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateJobDto } from './dto/jobs.dto';
 @ApiTags('jobs')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -33,7 +34,7 @@ export class JobController {
   @ApiResponse({ status: 201, description: 'Job opportunity created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Post('/create')
-  async createJob(@Token() token: string, @Body() data: any) {
+  async createJob(@Token() token: string, @Body() data: CreateJobDto) {
     return this.jobService.createJob(token, data);
   }
 
