@@ -36,7 +36,7 @@ export class EventsService {
     async getEvent(id: string) {
 
         let event: any;
-        event = await this.redis.getValue(`event:${event.id}`);
+        event = await this.redis.getValue(`event:${id}`);
         if (event)
             return event;
 

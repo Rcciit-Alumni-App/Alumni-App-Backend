@@ -14,6 +14,13 @@ import {
 
 export class SocialsDto {
   @ApiProperty({
+    description: 'Id',
+    type: String,
+    example: '1',
+  })
+  @IsString()
+  id: string;
+  @ApiProperty({
     description: 'Name of the social media platform',
     type: String,
     example: 'LinkedIn',
