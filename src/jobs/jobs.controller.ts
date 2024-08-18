@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { JobService } from './jobs.service';
 import { Token } from 'utils/decorators/token.decorator';
 import { JwtAuthGuard } from 'src/user/auth/guards/jwt.guard';
@@ -56,7 +56,7 @@ export class JobController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Job opportunity not found' })
   @Get('/:id')
-  async getJobById(@Token() token: string, @Query('id') id: string) {
+  async getJobById(@Token() token: string, @Param('id') id: string) {
     return this.jobService.getJobById(token, id);
   }
 
