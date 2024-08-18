@@ -54,7 +54,7 @@ model User {
   user_type       UserType
   stream          String?
   status          UserStatus
-  socials         Socials
+  socials         Socials?
   higher_studies  HigherStudies[]
   internships     Internships[]
   workExperiences WorkExperiences[]
