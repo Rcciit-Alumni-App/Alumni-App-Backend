@@ -11,6 +11,7 @@ import { CronService } from './cron/cron.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NewsModule } from './news/news.module';
 import { CommentsModule } from './comments/comments.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CommentsModule } from './comments/comments.module';
     EventsModule,
     NewsModule,
     CommentsModule,
+    NotificationModule,
   ],
   providers: [CronService],
 })
