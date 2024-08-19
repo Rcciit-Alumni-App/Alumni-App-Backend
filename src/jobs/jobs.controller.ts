@@ -66,7 +66,7 @@ export class JobController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Job opportunity not found' })
   @Delete('/:id')
-  async deleteJob(@Token() token: string, @Query('id') id: string) {
+  async deleteJob(@Token() token: string, @Param('id') id: string) {
     return this.jobService.deleteJob(token, id);
   }
 }

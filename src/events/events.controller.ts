@@ -62,7 +62,7 @@ export class EventsController {
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Event not found.' })
     @Post('/interest')
-    async showInterest(@Token() token: string, @Body() eventId: string) {
+    async showInterest(@Token() token: string, @Body() { eventId }: { eventId: string }) {
         return this.eventService.showInterest(token, eventId);
     }
 

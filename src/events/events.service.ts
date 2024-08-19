@@ -19,7 +19,7 @@ export class EventsService {
         const events = await this.prisma.events.findMany({
             skip: skip,
             take: take,
-            select:{
+            select: {
                 id: true,
                 event_name: true,
                 banner_image: true,
@@ -140,11 +140,13 @@ export class EventsService {
             throw new UnauthorizedException('User not found');
         }
 
+        console.log('Here 1');
         const event = await this.prisma.events.findFirst({
             where: {
                 id: eventId,
             }
         });
+        console.log('Here 2');
 
         if (event.userId === userId)
             throw new Error("You can't show interest in your event");
@@ -159,8 +161,7 @@ export class EventsService {
         if (existsInterest) {
             await this.prisma.eventInterests.delete({
                 where: {
-                    userId: userId,
-                    eventId: eventId
+                    id: existsInterest.id,
                 }
             })
         }
