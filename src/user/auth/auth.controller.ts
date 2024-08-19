@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Post, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto, ResetPasswordDto, SignupDto, UpdatePasswordDto, VerifyDto } from './dto';
 import { AuthService } from './auth.service';
 import { verifyRollNo } from '../../../utils/auth/verify_roll_no';
@@ -100,9 +100,57 @@ export class AuthController {
     return await this.authService.verify(verifyDto);
   }
 
+  @ApiOperation({ summary: 'Resend OTP', description: 'Allows the user to request a resend of their OTP.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        token: {
+          type: 'string',
+          description: 'JWT or session token to identify the user',
+        },
+      },
+      required: ['token'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTP has been resent successfully.',
+    schema: {
+      example: {
+        message: 'OTP has been resent successfully.',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests. You have exceeded the limit of OTP resend requests.',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        error: 'Too Many Requests',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. The token is invalid or expired.',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error. Something went wrong on the server.',
+  })
   @Throttle({ deafult: { ttl: 60000, limit: 2 } })
   @Post("/resend-otp")
-  async resendOTP(@Body() token: string) {
+  async resendOTP(@Body() { token }: { token: string }) {
     return this.authService.resendOTP(token);
   }
 
@@ -168,6 +216,32 @@ export class AuthController {
   }
 
   @Delete("/logout")
+  @ApiOperation({ summary: 'Logout', description: 'Logs out the user by invalidating their session or token.' })
+  @ApiBearerAuth() // This indicates that this endpoint requires a bearer token in the Authorization header
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully logged out.',
+    schema: {
+      example: {
+        message: 'Logged out successfully.',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. The token is invalid or expired.',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error. Something went wrong on the server.',
+  })
   async logout(@Token() token: string) {
     this.authService.logout(token);
   }
@@ -214,6 +288,50 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post("/reset-password")
+  @ApiOperation({
+    summary: 'Reset Password',
+    description: 'Allows a user to reset their password using a valid token.',
+  })
+  @ApiBearerAuth() // Requires JWT authentication
+  @ApiBody({
+    description: 'Data required to reset the password',
+    type: ResetPasswordDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully.',
+    schema: {
+      example: {
+        message: 'Password reset successfully.',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input data.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: ['password must be longer than or equal to 8 characters'],
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. The token is invalid or expired.',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error. Something went wrong on the server.',
+  })
   async resetPassword(@Token() token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(token, resetPasswordDto);
   }
