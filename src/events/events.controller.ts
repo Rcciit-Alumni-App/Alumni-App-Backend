@@ -16,8 +16,8 @@ export class EventsController {
     @ApiResponse({ status: 200, description: 'Events retrieved successfully.' })
     @ApiResponse({ status: 404, description: 'Events not found.' })
     @Get("/get-all")
-    async getAllEvents(@Query('skip') skip: number, @Query('limit') limit: number) {
-        return this.eventService.getAllEvents(limit, skip);
+    async getAllEvents(@Query('page') page: string, @Query('limit') limit: string) {
+        return this.eventService.getAllEvents(page, limit);
     }
 
     @ApiOperation({ summary: 'Retrieve a single event by ID' })

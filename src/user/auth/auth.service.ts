@@ -147,11 +147,13 @@ export class AuthService {
   }
 
   async resendOTP(token: string) {
-    const decoded = this.jwt.verify(token, {
+    const decoded = await this.jwt.verify(token, {
       secret: this.config.get('JWT_VERIFICATION_SECRET'),
     });
 
     const otp = generateOTP(6);
+    delete decoded.iat;
+    delete decoded.exp;
 
     const payload = { ...decoded, otp: otp };
 
@@ -167,7 +169,7 @@ export class AuthService {
     };
 
     await this.mailer.sendMail({
-      email: decoded.userType.user_type === 'ALUMNI' ? decoded.personal_email : decoded.college_email,
+      email: decoded.user_type !== UserType.STUDENT ? decoded.personal_email : decoded.college_email,
       subject: 'Account Activation',
       mail_file: 'verification_mail.ejs',
       data: mailData,
@@ -369,9 +371,9 @@ export class AuthService {
     //     secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
     //   });
     // else
-      return this.jwt.signAsync(payload, {
-        secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
-      });
+    return this.jwt.signAsync(payload, {
+      secret: this.config.get('JWT_AUTHENTICATION_SECRET'),
+    });
 
   }
 
