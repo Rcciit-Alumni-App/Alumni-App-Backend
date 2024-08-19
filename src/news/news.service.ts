@@ -90,10 +90,18 @@ export class NewsService {
         });
     }
 
-    async getAllNews(skip: number, limit: number) {
+    async getAllNews(page: string, limit: string) {
+        let skip = 0;
+        let take: number | undefined = undefined;
+        if (page && limit) {
+            skip = (parseInt(page) - 1) * parseInt(limit);
+            take = parseInt(limit);
+        } else if (page && !limit) {
+            skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
+        }
         const news = await this.prisma.news.findMany({
             skip: skip,
-            take: limit,
+            take: take,
         });
 
         return news;

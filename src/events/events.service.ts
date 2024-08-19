@@ -15,7 +15,15 @@ export class EventsService {
         private readonly redis: RedisService
     ) { }
 
-    async getAllEvents(take: number, skip: number) {
+    async getAllEvents(page: string, limit: string) {
+        let skip = 0;
+        let take: number | undefined = undefined;
+        if (page && limit) {
+            skip = (parseInt(page) - 1) * parseInt(limit);
+            take = parseInt(limit);
+        } else if (page && !limit) {
+            skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
+        }
         const events = await this.prisma.events.findMany({
             skip: skip,
             take: take,

@@ -41,7 +41,7 @@ export class CommentsController {
     @ApiResponse({ status: 200, description: 'Comments retrieved successfully.' })
     @ApiResponse({ status: 404, description: 'News article not found.' })
     @Get("/get")
-    async getComment(@Param("newsId") newsId: string, @Query("skip") skip: number, @Query("limit") limit: number) {
-        return this.commentService.getComments(newsId, skip, limit);
+    async getComment(@Param("newsId") newsId: string, @Query("page") page: string, @Query("limit") limit: string) {
+        return this.commentService.getComments(newsId, page, limit);
     }
 }

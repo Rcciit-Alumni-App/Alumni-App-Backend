@@ -132,8 +132,16 @@ export class CommentsService {
         });
     }
 
-    async getComments(newsId: string, skip: number, limit: number) {
+    async getComments(newsId: string, page: string, limit: string) {
 
+        let skip = 0;
+        let take: number | undefined = undefined;
+        if (page && limit) {
+            skip = (parseInt(page) - 1) * parseInt(limit);
+            take = parseInt(limit);
+        } else if (page && !limit) {
+            skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
+        }
         let comments = [];
         comments = await this.redis.getValue(`comment:${newsId}:${skip}:${limit}`);
         if (comments)
@@ -143,7 +151,7 @@ export class CommentsService {
                 newsId: newsId
             },
             skip: skip,
-            take: limit,
+            take: take,
             select: {
                 id: true,
                 comment: true,
