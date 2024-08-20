@@ -80,11 +80,10 @@ type HigherStudies {
 }
 
 type Internships {
-  id         Int
   company    String
   role       String
   start_date DateTime
-  end_date   DateTime
+  end_date   DateTime?
   skills     String[]
 }
 
@@ -92,6 +91,11 @@ enum WorkStatus {
   ONGOING
   EX_EMPLOYEE
 }
+
+// enum WorkType {
+//   INTERNSHIP
+//   JOB
+// }
 
 model WorkExperiences {
   id          String     @id @default(auto()) @map("_id") @db.ObjectId
@@ -101,6 +105,7 @@ model WorkExperiences {
   role        String
   start_date  DateTime
   end_date    DateTime?
+  // work_type   WorkType
   status      WorkStatus
   skills      String[]
   description String

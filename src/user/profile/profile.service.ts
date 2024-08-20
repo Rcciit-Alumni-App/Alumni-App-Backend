@@ -51,6 +51,13 @@ export class ProfileService {
       message += 'College roll cannot be updated. ';
     }
 
+    data.internships.map((internship) => {
+      delete internship.id;
+      delete internship.description;
+
+      internship.end_date = internship.end_date ?? undefined;
+    });
+
     const updatedData = { ...data };
 
     const updatedProfile = await this.prisma.user.update({
