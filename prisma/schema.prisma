@@ -16,6 +16,7 @@ datasource db {
 enum UserType {
   STUDENT
   ALUMNI
+  ADMIN
 }
 
 enum UserStatus {
@@ -26,9 +27,17 @@ enum UserStatus {
   COMPLETED
 }
 
-enum JobTypes {
-    JOB
-    INTERNSHIP
+model CollegeUser {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  roll_no       String @unique
+  stream        String
+  passing_year  String
+  phone_number  String
+  personal_mail String
+  college_mail  String @unique
+
+  @@index([college_mail, personal_mail])
 }
 
 model User {
@@ -45,10 +54,21 @@ model User {
   user_type       UserType
   stream          String?
   status          UserStatus
+  socials         Socials?
   higher_studies  HigherStudies[]
   internships     Internships[]
   workExperiences WorkExperiences[]
   jobs            Jobs[]            @relation("UserJobs")
+  events          Events[]
+  eventInterests  EventInterests[]
+  news            News[]
+  comment         Comment[]
+}
+
+type Socials {
+  id       Int
+  platform String
+  url      String
 }
 
 type HigherStudies {
@@ -60,11 +80,10 @@ type HigherStudies {
 }
 
 type Internships {
-  id         Int
   company    String
   role       String
   start_date DateTime
-  end_date   DateTime
+  end_date   DateTime?
   skills     String[]
 }
 
@@ -72,6 +91,11 @@ enum WorkStatus {
   ONGOING
   EX_EMPLOYEE
 }
+
+// enum WorkType {
+//   INTERNSHIP
+//   JOB
+// }
 
 model WorkExperiences {
   id          String     @id @default(auto()) @map("_id") @db.ObjectId
@@ -81,33 +105,111 @@ model WorkExperiences {
   role        String
   start_date  DateTime
   end_date    DateTime?
+  // work_type   WorkType
   status      WorkStatus
   skills      String[]
   description String
 }
 
 model JobCategories {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  name  String  @unique
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
 
-  jobs  Jobs[]  @relation("CategoryJobs")
+  jobs Jobs[] @relation("CategoryJobs")
 }
 
+enum JobTypes {
+  JOB
+  INTERNSHIP
+}
 
 model Jobs {
-  id                   String         @id @default(auto()) @map("_id") @db.ObjectId 
-  category_id          String         @db.ObjectId
-  category             JobCategories  @relation(fields: [category_id], references: [id], onDelete: Cascade, name: "CategoryJobs")
-  created_by           String         @db.ObjectId
-  user                 User           @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
+  id                   String        @id @default(auto()) @map("_id") @db.ObjectId
+  category_id          String        @db.ObjectId
+  category             JobCategories @relation(fields: [category_id], references: [id], onDelete: Cascade, name: "CategoryJobs")
+  created_by           String        @db.ObjectId
+  user                 User          @relation(fields: [created_by], references: [id], onDelete: Cascade, name: "UserJobs")
   title                String
   company_name         String
-  description          String
-  apply_link           String
-  location             String
+  description          String?
+  apply_link           String?
+  location             String?
   job_type             JobTypes
-  posted_at            DateTime       @default(now())
+  posted_at            DateTime      @default(now())
   application_deadline DateTime
 }
 
+type EventAttraction {
+  label String
+  value String
+}
 
+type EventAnnouncements {
+  title       String
+  description String
+}
+
+model Events {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  event_name     String
+  banner_image   String
+  venue          String
+  description    String[]
+  images         String[]
+  schedule       String
+  attractions    EventAttraction
+  rules          String[]
+  announcements  EventAnnouncements
+  eventInterests EventInterests[]
+  expires_at     DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model EventInterests {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String   @unique @db.ObjectId
+  event     Events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+}
+
+type NewsActivity {
+  total_likes    Int
+  total_comments Int
+}
+
+model News {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  author_id   String        @db.ObjectId
+  author      User          @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  banner      String
+  tags        String[]
+  activities  NewsActivity?
+  comment     Comment[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Comment {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  newsId String @db.ObjectId
+  news   News   @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  comment  String
+  isEdited Boolean
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}

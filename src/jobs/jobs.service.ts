@@ -5,7 +5,7 @@ import { JobTypes } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RedisService } from "src/redis/redis.service";
 import { decodeToken } from "utils/auth/decodeToken";
-import { UpdateJobDto } from "./dto/jobs.dto";
+import { CreateJobDto, UpdateJobDto } from "./dto/jobs.dto";
 
 @Injectable()
 export class JobService {
@@ -21,11 +21,24 @@ export class JobService {
         job_type: jobType,
         category_id: category,
       },
+      select: {
+        id: true,
+        title: true,
+        company_name: true,
+        description: true,
+        job_type: true,
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
     });
     return jobs;
   }
 
-  async createJob(token: string, data: any) {
+  async createJob(token: string, data: CreateJobDto) {
     const userId = decodeToken(token, this.jwt, this.config);
     const user = await this.redis.getValue(userId);
     if (!user) {
@@ -55,7 +68,7 @@ export class JobService {
     return job;
   }
 
-  async getJobById(token: string,id: string) {
+  async getJobById(token: string, id: string) {
     const userId = decodeToken(token, this.jwt, this.config);
     const user = await this.redis.getValue(userId);
     if (!user) {
