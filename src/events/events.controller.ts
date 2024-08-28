@@ -20,6 +20,11 @@ export class EventsController {
         return this.eventService.getAllEvents(page, limit);
     }
 
+    @Get("/get-all/me")
+    async getAllEventsByUserId(@Token() token: string, @Query('page') page: string, @Query('limit') limit: string) {
+        return this.eventService.getAllEventsByUserId(token, page, limit);
+    }
+
     @ApiOperation({ summary: 'Retrieve a single event by ID' })
     @ApiResponse({ status: 200, description: 'Event retrieved successfully.' })
     @ApiResponse({ status: 404, description: 'Event not found.' })

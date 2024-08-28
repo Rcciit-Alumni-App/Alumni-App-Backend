@@ -40,8 +40,13 @@ export class NewsController {
     @ApiQuery({ name: 'skip', description: 'Number of posts to skip', required: false, type: Number })
     @ApiQuery({ name: 'limit', description: 'Number of posts to limit', required: false, type: Number })
     @Get("/get-all")
-    async getAllNews(@Token() token: string, @Query('page') page: string, @Query('limit') limit: string) {
+    async getAllNews(@Query('page') page: string, @Query('limit') limit: string) {
         return this.newsService.getAllNews(page, limit);
+    }
+
+    @Get("/get-all/me")
+    async getAllNewsByUserId(@Token() token: string, @Query('page') page: string, @Query('limit') limit: string) {
+        return this.newsService.getAllNewsByUserId(token, page, limit);
     }
 
     @ApiOperation({ summary: 'Get a single news post by ID' })

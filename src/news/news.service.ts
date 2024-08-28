@@ -107,6 +107,31 @@ export class NewsService {
         return news;
     }
 
+    async getAllNewsByUserId(token: string, page: string, limit: string) {
+        let skip = 0;
+        let take: number | undefined = undefined;
+        if (page && limit) {
+            skip = (parseInt(page) - 1) * parseInt(limit);
+            take = parseInt(limit);
+        } else if (page && !limit) {
+            skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
+        }
+        const userId = decodeToken(token, this.jwt, this.config);
+        const user = await this.redis.getValue(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+        const news = await this.prisma.news.findMany({
+            where: {
+                author_id: userId
+            },
+            skip: skip,
+            take: take,
+        });
+
+        return news;
+    }
+
     async getNews(id: string) {
         let news: any;
         news = await this.redis.getValue(`news:${id}`);

@@ -41,6 +41,40 @@ export class EventsService {
         return events;
     }
 
+    async getAllEventsByUserId(token: string, page: string, limit: string) {
+        let skip = 0;
+        let take: number | undefined = undefined;
+        if (page && limit) {
+            skip = (parseInt(page) - 1) * parseInt(limit);
+            take = parseInt(limit);
+        } else if (page && !limit) {
+            skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
+        }
+        const userId = decodeToken(token, this.jwt, this.config);
+        const user = await this.redis.getValue(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+        const events = await this.prisma.events.findMany({
+            where: {
+                userId: userId,
+            },
+            skip: skip,
+            take: take,
+            select: {
+                id: true,
+                event_name: true,
+                banner_image: true,
+                schedule: true,
+                description: true,
+            }
+        });
+        events.map((event) => {
+            this.redis.setCache(event.id, event);
+        });
+        return events;
+    }
+
     async getEvent(id: string) {
 
         let event: any;
