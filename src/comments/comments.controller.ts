@@ -24,7 +24,7 @@ export class CommentsController {
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 404, description: 'Comment not found.' })
     @Put("/update/:id")
-    async updateComment(@Token() token: string, @Param('id') id: string, comment: string) {
+    async updateComment(@Token() token: string, @Param('id') id: string, @Body() { comment }: { comment: string }) {
         return this.commentService.updateComment(token, id, comment);
     }
 
