@@ -143,9 +143,9 @@ export class CommentsService {
             skip = (parseInt(page) - 1) * 10; // Default limit if only page is provided, you can adjust the default value
         }
         let comments = [];
-        comments = await this.redis.getValue(`comment:${newsId}:${skip}:${limit}`);
-        if (comments)
-            return comments;
+        // comments = await this.redis.getValue(`comment:${newsId}:${skip}:${limit}`);
+        // if (comments)
+        //     return comments;
         comments = await this.prisma.comment.findMany({
             where: {
                 newsId: newsId
