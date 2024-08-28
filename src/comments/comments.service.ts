@@ -70,7 +70,7 @@ export class CommentsService {
             }
         });
 
-        if (existsComment)
+        if (!existsComment)
             throw new Error("Comment doesn't exists");
 
         const updatedComment = await this.prisma.comment.update({
@@ -100,7 +100,7 @@ export class CommentsService {
             }
         });
 
-        if (existsComment)
+        if (!existsComment)
             throw new Error("Comment doesn't exists");
 
         const news = await this.prisma.news.findFirst({
